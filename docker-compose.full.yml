@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ariesview51-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ariesview
+      POSTGRES_PASSWORD: Ariesview123
+      POSTGRES_DB: ariesview
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ariesview"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+# Removed the persistent volume definition as requested 

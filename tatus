@@ -1,0 +1,29 @@
+[33mcommit 6653533a8edbf0552a35aa5feab14c588784d0d5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: michele <user@example.com>
+Date:   Mon Mar 17 23:59:51 2025 -0400
+
+    Initial commit: Updated property details page and document management system
+
+[33mcommit 60bc0d0171139e53b7743272d8643acb42db510c[m
+Author: michele <user@example.com>
+Date:   Mon Mar 17 18:38:53 2025 -0400
+
+    Removed Custom Property Views and added search/filter functionality to Property Details
+
+[33mcommit 1d71077f09fd06ae6d12a97776373643f9fc0b92[m
+Author: michele <user@example.com>
+Date:   Mon Mar 17 18:28:29 2025 -0400
+
+    Removed Analytics, Documents, and Funds sections from sidebar and operations dashboard
+
+[33mcommit f02b137955b551946ad0f3a1ec4942eed2ac5990[m
+Author: michele <user@example.com>
+Date:   Mon Mar 17 16:42:17 2025 -0400
+
+    Integrated User Settings, Team Management, and Support Center into operations dashboard
+
+[33mcommit 5d668fabdf35eef2af0a0346f5630cbbc4c8d48a[m
+Author: michele <user@example.com>
+Date:   Mon Mar 17 10:53:01 2025 -0400
+
+    Added detailed lease report feature with comprehensive information display
