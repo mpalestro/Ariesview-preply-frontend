@@ -7,11 +7,11 @@ export default function HeroHome() {
       <PageIllustration />
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {/* Hero content */}
-        <div className="pb-6 pt-12 md:pb-10 md:pt-20">
+        <div className="pb-6 pt-0 md:pb-8 md:pt-2">
           {/* Section header */}
           <div className="pb-6 text-center md:pb-8">
             <h1
-              className="mb-6 text-5xl font-bold md:text-6xl"
+              className="mb-4 text-5xl font-bold md:text-6xl"
               data-aos="zoom-y-out"
               data-aos-delay={150}
             >
@@ -19,13 +19,13 @@ export default function HeroHome() {
             </h1>
             <div className="mx-auto max-w-3xl">
               <p
-                className="mb-8 text-lg text-gray-700"
+                className="mb-6 text-lg text-gray-700"
                 data-aos="zoom-y-out"
                 data-aos-delay={300}
               >
                 Inspired by Aries, the Zodiac sign of bold leadership, we fuel confident CRE decisions
               </p>
-              <div className="relative before:absolute before:inset-0 before:border-y before:[border-image:linear-gradient(to_right,transparent,--theme(--color-slate-300/.8),transparent)1]">
+              <div className="relative">
                 <div
                   className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center"
                   data-aos="zoom-y-out"

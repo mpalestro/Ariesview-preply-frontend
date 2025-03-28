@@ -134,11 +134,18 @@ function ApplyPageContent() {
 
   return (
     <>
-      <div className="pt-32 pb-12 md:pt-40 md:pb-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="mx-auto max-w-3xl text-center pb-12 md:pb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#001A41] mb-6">Apply to AriesView</h1>
-            <p className="text-xl text-[#001A41] text-opacity-80">Join our team and help transform how real estate professionals make investment decisions.</p>
+      <div className="relative bg-[#F8F9FF] pt-6 md:pt-8 pb-20">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[url('/background-pattern.svg')] opacity-10"></div>
+        </div>
+        <div className="relative container mx-auto px-4">
+          <div className="max-w-[1200px] mx-auto text-center">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-[#001233] leading-tight">
+              Join Our Team
+            </h1>
+            <p className="text-xl md:text-2xl mb-12 text-gray-600 max-w-4xl mx-auto">
+              Help us transform how real estate professionals make investment decisions with AI-powered analytics
+            </p>
           </div>
           
           {/* Main content */}

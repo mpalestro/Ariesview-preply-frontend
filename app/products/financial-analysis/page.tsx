@@ -10,7 +10,7 @@ export default function FinancialAnalysis() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero section */}
-      <div className="relative bg-[#F8F9FF] pt-32 pb-20">
+      <div className="relative bg-[#F8F9FF] pt-6 md:pt-8 pb-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('/background-pattern.svg')] opacity-10"></div>
         </div>

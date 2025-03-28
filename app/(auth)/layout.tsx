@@ -19,14 +19,14 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${inter.variable} font-inter flex flex-col min-h-screen`}>
+    <div className={`${inter.variable} font-inter flex flex-col min-h-screen bg-gray-50`}>
       <AuthBackground />
       
-      <main className="flex-grow flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
       
-      <footer className="py-4 text-center text-sm text-gray-500">
+      <footer className="py-6 text-center text-sm text-gray-500">
         <p>© {new Date().getFullYear()} AriesView. All rights reserved.</p>
       </footer>
     </div>

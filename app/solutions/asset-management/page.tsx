@@ -1,6 +1,6 @@
 export const metadata = {
   title: "Asset Management - AriesView",
-  description: "AI-powered asset management and optimization for real estate portfolios",
+  description: "Enterprise asset management platform for real estate portfolios",
 };
 
 import Link from "next/link";
@@ -9,7 +9,7 @@ export default function AssetManagementPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero section */}
-      <div className="relative bg-[#F8F9FF] pt-32 pb-20">
+      <div className="relative bg-[#F8F9FF] pt-6 md:pt-8 pb-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('/background-pattern.svg')] opacity-10"></div>
         </div>
@@ -19,7 +19,7 @@ export default function AssetManagementPage() {
               Asset Management
             </h1>
             <p className="text-xl md:text-2xl mb-12 text-gray-600 max-w-4xl mx-auto">
-              Optimize your real estate portfolio performance with AI-powered analytics and automation
+              Optimize your portfolio performance with our comprehensive asset management platform
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <Link
@@ -48,27 +48,27 @@ export default function AssetManagementPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="bg-[#001A41] rounded-lg overflow-hidden">
               <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-3">Expense Tracking</h3>
+                <h3 className="text-xl font-bold text-white mb-3">Financial Management</h3>
                 <p className="text-white text-opacity-90">
-                  Monitor and analyze property expenses to optimize operational costs and efficiency
+                  Track income, expenses, and key financial metrics across your portfolio
                 </p>
               </div>
             </div>
 
             <div className="bg-[#001A41] rounded-lg overflow-hidden">
               <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-3">Lease Management</h3>
+                <h3 className="text-xl font-bold text-white mb-3">Property Operations</h3>
                 <p className="text-white text-opacity-90">
-                  Automated rent collection, lease compliance monitoring, and tenant relationship management
+                  Streamline maintenance, vendor management, and property improvements
                 </p>
               </div>
             </div>
 
             <div className="bg-[#001A41] rounded-lg overflow-hidden">
               <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-3">Investor Relations</h3>
+                <h3 className="text-xl font-bold text-white mb-3">Tenant Management</h3>
                 <p className="text-white text-opacity-90">
-                  Generate detailed waterfall calculations and investor reports with automated distribution tracking
+                  Manage leases, tenant communications, and occupancy optimization
                 </p>
               </div>
             </div>
@@ -76,62 +76,105 @@ export default function AssetManagementPage() {
         </div>
       </div>
 
-      {/* Platform Preview */}
+      {/* Performance Metrics */}
       <div className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[#001233]">Portfolio Performance</h2>
+          <p className="text-xl text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+            Track and optimize key performance indicators across your portfolio
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[#001233] mb-2">15%</div>
+              <div className="text-sm text-gray-600">NOI Improvement</div>
+              <div className="text-xs text-gray-500 mt-1">Average portfolio increase</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[#001233] mb-2">30%</div>
+              <div className="text-sm text-gray-600">Cost Reduction</div>
+              <div className="text-xs text-gray-500 mt-1">In operational expenses</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[#001233] mb-2">95%</div>
+              <div className="text-sm text-gray-600">Occupancy Rate</div>
+              <div className="text-xs text-gray-500 mt-1">Portfolio average</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[#001233] mb-2">24/7</div>
+              <div className="text-sm text-gray-600">Portfolio Monitoring</div>
+              <div className="text-xs text-gray-500 mt-1">Real-time analytics</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Benefits Section */}
+      <div className="py-20 bg-white">
+        <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="grid md:grid-cols-2 gap-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[#001233]">
-                  Optimize Your Portfolio Performance
+                <h2 className="text-3xl md:text-4xl font-bold mb-8 text-[#001233]">
+                  Benefits
                 </h2>
-                <div className="space-y-4">
-                  <p className="text-gray-600">
-                    Our platform helps you maximize returns and minimize risks across your entire portfolio:
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-start">
-                      <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600">Real-time performance monitoring and benchmarking</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600">Automated lease and compliance management</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600">Comprehensive investor reporting and analytics</span>
-                    </li>
-                  </ul>
+                <div className="space-y-6">
+                  <div className="flex items-start">
+                    <svg className="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#001233] mb-2">Increased Efficiency</h3>
+                      <p className="text-gray-600">Automate routine tasks and streamline operations</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <svg className="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#001233] mb-2">Better Decision Making</h3>
+                      <p className="text-gray-600">Data-driven insights for portfolio optimization</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <svg className="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#001233] mb-2">Enhanced Reporting</h3>
+                      <p className="text-gray-600">Comprehensive reporting and analytics tools</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500">Portfolio Value</p>
-                    <p className="text-2xl font-bold text-[#001233]">$100M+</p>
-                    <p className="text-sm text-green-600">Assets managed</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500">Cost Reduction</p>
-                    <p className="text-2xl font-bold text-[#001233]">30%</p>
-                    <p className="text-sm text-green-600">Average savings</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500">Compliance Rate</p>
-                    <p className="text-2xl font-bold text-[#001233]">100%</p>
-                    <p className="text-sm text-green-600">Automated tracking</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500">Time Saved</p>
-                    <p className="text-2xl font-bold text-[#001233]">85%</p>
-                    <p className="text-sm text-green-600">On reporting</p>
+              <div>
+                <div className="bg-white p-8 rounded-lg shadow-lg">
+                  <h3 className="text-2xl font-bold text-[#001233] mb-6">Platform Features</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-600">Real-time performance tracking</span>
+                    </div>
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-600">Automated financial reporting</span>
+                    </div>
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-600">Tenant portal integration</span>
+                    </div>
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-gray-600">Maintenance request tracking</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,24 +184,24 @@ export default function AssetManagementPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 bg-white">
+      <div className="bg-gradient-to-r from-[#001233] to-[#001845] py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[#001233]">
-            Ready to Transform Your Asset Management?
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+            Ready to Optimize Your Portfolio?
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join leading institutions using AriesView to optimize their portfolio performance
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Join leading institutions using AriesView to transform their asset management
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center px-8 py-3 rounded-lg bg-[#001233] text-white font-semibold hover:bg-[#001845] transition-colors"
+              className="inline-flex items-center px-8 py-3 rounded-lg bg-white text-[#001233] font-semibold hover:bg-gray-100 transition-colors"
             >
               Schedule Demo
             </Link>
             <Link
               href="/signin"
-              className="inline-flex items-center px-8 py-3 rounded-lg border-2 border-[#001233] text-[#001233] font-semibold hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center px-8 py-3 rounded-lg border-2 border-white text-white font-semibold hover:bg-white/10 transition-colors"
             >
               Try For Free
             </Link>

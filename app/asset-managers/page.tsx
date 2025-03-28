@@ -9,7 +9,7 @@ export default function AssetManagers() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero section */}
-      <div className="relative bg-[#F8F9FF] pt-32 pb-20">
+      <div className="relative bg-[#F8F9FF] pt-6 md:pt-8 pb-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('/background-pattern.svg')] opacity-10"></div>
         </div>
@@ -140,24 +140,24 @@ export default function AssetManagers() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 bg-white">
+      <div className="bg-gradient-to-r from-[#001233] to-[#001845] py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[#001233]">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
             Ready to Transform Your Property Management?
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join leading asset managers using AriesView to optimize property performance
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center px-8 py-3 rounded-lg bg-[#001233] text-white font-semibold hover:bg-[#001845] transition-colors"
+              className="inline-flex items-center px-8 py-3 rounded-lg bg-white text-[#001233] font-semibold hover:bg-gray-100 transition-colors"
             >
               Schedule a Demo
             </Link>
             <Link
               href="/signin"
-              className="inline-flex items-center px-8 py-3 rounded-lg border-2 border-[#001233] text-[#001233] font-semibold hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center px-8 py-3 rounded-lg border-2 border-white text-white font-semibold hover:bg-white/10 transition-colors"
             >
               Start Free Trial
             </Link>

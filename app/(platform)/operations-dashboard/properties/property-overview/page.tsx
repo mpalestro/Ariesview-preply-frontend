@@ -190,12 +190,41 @@ export default function PropertyOverview() {
     <div className="bg-gray-50 min-h-screen w-full p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         <header className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Property Overview</h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            {selectedFund === 'all' 
-              ? 'Manage and monitor your entire real estate portfolio'
-              : `Viewing properties in ${selectedFund}`}
-          </p>
+          <div className="flex flex-col justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Property Overview</h1>
+              <p className="text-sm sm:text-base text-gray-600 mb-4">
+                {selectedFund === 'all' 
+                  ? 'Manage and monitor your entire real estate portfolio'
+                  : `Viewing properties in ${selectedFund}`}
+              </p>
+              <div className="flex flex-wrap gap-4 mt-2">
+                <Link 
+                  href="/operations-dashboard/properties/portfolio-analysis" 
+                  className="inline-flex items-center px-8 py-3 rounded-lg bg-[#001233] text-white font-semibold hover:bg-[#001845] transition-colors"
+                >
+                  Portfolio Analysis →
+                </Link>
+                <Link 
+                  href="/operations-dashboard/properties/investment-calculator" 
+                  className="inline-flex items-center px-8 py-3 rounded-lg bg-[#1B365D] text-white font-semibold hover:bg-[#264573] transition-colors"
+                >
+                  Investment Calculator →
+                </Link>
+              </div>
+            </div>
+            <div className="mt-6 self-end">
+              <Link
+                href="/operations-dashboard/properties/add"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Add a property
+              </Link>
+            </div>
+          </div>
         </header>
         
         {/* Portfolio Summary */}

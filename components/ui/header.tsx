@@ -147,7 +147,7 @@ export default function Header() {
   return (
     <header className="fixed top-2 z-30 w-full md:top-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-10">
-        <div className="relative flex h-14 items-center justify-between rounded-2xl bg-white/90 px-4 shadow-lg shadow-black/[0.03] backdrop-blur-xs" ref={dropdownRef}>
+        <div className="relative flex h-14 items-center justify-between rounded-2xl bg-white px-4 shadow-lg shadow-black/[0.03]" ref={dropdownRef}>
 
           {/* Site branding (Logo) */}
           <div className="flex items-center">
@@ -184,7 +184,7 @@ export default function Header() {
                   Products ▾
                 </button>
                 {openDropdown === "products" && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
                     <Link href="/products/ariesview-ai" className="block px-4 py-3 hover:bg-gray-100 rounded-lg">
                       <p className="text-lg font-semibold">AriesView AI</p>
                       <p className="text-base text-gray-600">Private AI assistant for CRE analysis and insights.</p>
@@ -211,7 +211,7 @@ export default function Header() {
                   Solutions ▾
                 </button>
                 {openDropdown === "solutions" && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
                     <Link href="/solutions/acquisition-screening" className="block px-4 py-3 hover:bg-gray-100 rounded-lg">
                       <p className="text-lg font-semibold">Acquisition Screening</p>
                       <p className="text-base text-gray-600">AI-powered deal analysis and screening.</p>
@@ -238,7 +238,7 @@ export default function Header() {
                   Clients ▾
                 </button>
                 {openDropdown === "clients" && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
                     <Link href="/private-equity" className="block px-4 py-3 hover:bg-gray-100 rounded-lg">
                       <p className="text-lg font-semibold">Real Estate Private Equity</p>
                       <p className="text-base text-gray-600">Institutional-grade tools for fund management.</p>
@@ -265,12 +265,12 @@ export default function Header() {
                   Company ▾
                 </button>
                 {openDropdown === "company" && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
                     <Link href="/about" className="block px-4 py-3 hover:bg-gray-100 rounded-lg">
                       <p className="text-lg font-semibold">About</p>
                       <p className="text-base text-gray-600">Learn more about our mission and values.</p>
                     </Link>
-                    <Link href="/CustomerSuccess" className="block px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <Link href="/customer-success" className="block px-4 py-3 hover:bg-gray-100 rounded-lg">
                       <p className="text-lg font-semibold">Customer Success</p>
                       <p className="text-base text-gray-600">How we help our customers succeed.</p>
                     </Link>
@@ -395,7 +395,7 @@ export default function Header() {
                     <Link href="/about" className="block py-2">
                       About
                     </Link>
-                    <Link href="/CustomerSuccess" className="block py-2">
+                    <Link href="/customer-success" className="block py-2">
                       Customer Success
                     </Link>
                     <Link href="/careers" className="block py-2">

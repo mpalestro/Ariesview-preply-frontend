@@ -1,9 +1,8 @@
--- Create organizations table
-CREATE TABLE organizations (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+-- Create the database if it doesn't exist
+CREATE DATABASE ariesview;
+
+-- Connect to the database
+\c ariesview;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
@@ -21,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (email, password_hash, first_name, last_name)
 VALUES (
     'admin@example.com',
-    '$2a$10$oqYI3ohV2zPRWLjH52xIQepL6a6k5Qi3xhGkJRYTKC8xzf8kxYEcK',
+    '$2a$10$YourHashedPasswordHere', -- This will be replaced with actual hash
     'Admin',
     'User'
 )

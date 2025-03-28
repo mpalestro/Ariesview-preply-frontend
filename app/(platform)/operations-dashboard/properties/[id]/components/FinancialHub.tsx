@@ -1,1136 +1,989 @@
-import React, { useState } from 'react';
-import ExcelEditor from './ExcelEditor';
-import HandsontableExcel from './HandsontableExcel';
+import { useState, useRef, Suspense, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FilePlus2, Upload } from "lucide-react";
-import Image from "next/image";
+import { Download, Search, Edit, Plus, ChevronDown } from "lucide-react";
+import dynamic from 'next/dynamic';
 
-interface FinancialHubProps {
-  propertyName: string;
-}
+const HandsontableExcel = dynamic(() => import('./HandsontableExcel'), {
+  ssr: false,
+  loading: () => <div className="p-4 text-center">Loading spreadsheet...</div>
+});
 
-// New component for editable financial metric cards
-interface FinancialMetricCardProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  info?: string;
-  editable?: boolean;
-}
+// Main categories for the financial hub
+const MAIN_CATEGORIES = [
+  { id: 'property', name: 'Property Analysis', icon: 'P' },
+  { id: 'financial', name: 'Financial Statements', icon: 'F' },
+  { id: 'acquisition', name: 'Acquisition Analysis', icon: 'A' },
+  { id: 'tax', name: 'Tax Planning', icon: 'T' }
+];
 
-// Excel Sheet Tab Component
-interface ExcelSheetTabProps {
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-const ExcelSheetTab: React.FC<ExcelSheetTabProps> = ({ label, isActive, onClick }) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center justify-between w-full px-4 py-3 text-left text-sm font-medium border-b ${
-        isActive
-          ? 'bg-blue-50 border-blue-500 text-blue-700'
-          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-      }`}
-    >
-      <span>{label}</span>
-      {isActive && (
-        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      )}
-    </button>
-  );
+// Sub-categories for each main category
+const SUB_CATEGORIES = {
+  property: [
+    { id: 'overview', name: 'Overview' },
+    { id: 'income', name: 'Income' },
+    { id: 'expenses', name: 'Expenses' },
+    { id: 'financing', name: 'Financing' },
+    { id: 'market', name: 'Market' }
+  ],
+  financial: [
+    { id: 'income-statement', name: 'Income Statement' },
+    { id: 'balance-sheet', name: 'Balance Sheet' },
+    { id: 'cash-flow', name: 'Cash Flow' },
+    { id: 'budget', name: 'Budget' },
+    { id: 'variance', name: 'Variance Analysis' }
+  ],
+  acquisition: [
+    { id: 'summary', name: 'Summary' },
+    { id: 'investment', name: 'Investment' },
+    { id: 'returns', name: 'Returns' },
+    { id: 'scenarios', name: 'Scenarios' },
+    { id: 'comparables', name: 'Comparables' }
+  ],
+  tax: [
+    { id: 'projections', name: 'Projections' },
+    { id: 'depreciation', name: 'Depreciation' },
+    { id: 'deductions', name: 'Deductions' },
+    { id: 'planning', name: 'Planning' },
+    { id: 'compliance', name: 'Compliance' }
+  ]
 };
 
-// Excel Sheet Content
-interface ExcelSheetContentProps {
-  label: string;
-}
+export default function FinancialHub() {
+  const [activeMainCategory, setActiveMainCategory] = useState('property');
+  const [activeSubCategory, setActiveSubCategory] = useState('overview');
+  const [searchQuery, setSearchQuery] = useState('');
 
-const ExcelSheetContent: React.FC<ExcelSheetContentProps> = ({ label }) => {
-  // Excel data based on the tab type
-  const getExcelData = () => {
-    switch (label.toLowerCase()) {
-      case 'property':
-        return {
-          headers: ['Property Name', 'Address', 'City', 'State', 'Zip', 'Property Type', 'Year Built', 'Square Footage'],
-          rows: [
-            ['West Broadway 502', '502 West Broadway', 'San Diego', 'CA', '92101', 'Office', '1985', '45,000'],
-            ['Property Details', '', '', '', '', '', '', ''],
-            ['Purchase Date', 'May 2022', '', '', '', '', '', ''],
-            ['Ownership Type', 'Fee Simple', '', '', '', '', '', ''],
-            ['Land Area (acres)', '0.75', '', '', '', '', '', ''],
-            ['Parking Spaces', '112', '', '', '', '', '', ''],
-            ['Occupancy Rate', '92%', '', '', '', '', '', ''],
-            ['Property Manager', 'Evolston PM', '', '', '', '', '', ''],
-            ['Notes', 'Class A office building with recent renovations', '', '', '', '', '', '', '']
-          ]
-        };
-      case 'unit mix':
-        return {
-          headers: ['Unit Type', 'Count', 'SF/Unit', 'Total SF', 'Rent/SF', 'Monthly Rent', 'Annual Rent', 'Occupancy'],
-          rows: [
-            ['Suite 100', '1', '5,500', '5,500', '$3.25', '$17,875', '$214,500', '100%'],
-            ['Suite 200', '1', '8,250', '8,250', '$3.40', '$28,050', '$336,600', '100%'],
-            ['Suite 300', '1', '8,250', '8,250', '$3.35', '$27,638', '$331,650', '100%'],
-            ['Suite 400', '1', '8,250', '8,250', '$3.50', '$28,875', '$346,500', '75%'],
-            ['Suite 500', '1', '8,250', '8,250', '$3.45', '$28,463', '$341,550', '100%'],
-            ['Suite 600', '1', '6,500', '6,500', '$3.30', '$21,450', '$257,400', '80%'],
-            ['Totals', '6', '-', '45,000', '$3.38', '$152,350', '$1,828,200', '92%']
-          ]
-        };
-      case 'income':
-        return {
-          headers: ['Income Item', 'Monthly', 'Annual', 'PSF', '% of Total', 'Year 1', 'Year 2', 'Year 3'],
-          rows: [
-            ['Base Rent', '$152,350', '$1,828,200', '$40.63', '87.5%', '$1,828,200', '$1,883,046', '$1,939,537'],
-            ['Expense Reimbursements', '$18,750', '$225,000', '$5.00', '10.8%', '$225,000', '$231,750', '$238,703'],
-            ['Parking Income', '$2,800', '$33,600', '$0.75', '1.6%', '$33,600', '$34,608', '$35,646'],
-            ['Other Income', '$250', '$3,000', '$0.07', '0.1%', '$3,000', '$3,090', '$3,183'],
-            ['Vacancy', '($10,640)', '($127,680)', '($2.84)', '-6.1%', '($127,680)', '($131,510)', '($135,456)'],
-            ['Total Income', '$163,510', '$1,962,120', '$43.60', '100.0%', '$1,962,120', '$2,020,984', '$2,081,613']
-          ]
-        };
-      case 'expense':
-        return {
-          headers: ['Expense Item', 'Monthly', 'Annual', 'PSF', '% of Total', 'Year 1', 'Year 2', 'Year 3'],
-          rows: [
-            ['Property Tax', '$16,875', '$202,500', '$4.50', '27.0%', '$202,500', '$208,575', '$214,832'],
-            ['Insurance', '$5,625', '$67,500', '$1.50', '9.0%', '$67,500', '$69,525', '$71,611'],
-            ['Utilities', '$11,250', '$135,000', '$3.00', '18.0%', '$135,000', '$139,050', '$143,222'],
-            ['Repairs & Maintenance', '$7,500', '$90,000', '$2.00', '12.0%', '$90,000', '$92,700', '$95,481'],
-            ['Janitorial', '$6,750', '$81,000', '$1.80', '10.8%', '$81,000', '$83,430', '$85,933'],
-            ['Management Fee', '$5,906', '$70,867', '$1.57', '9.5%', '$70,867', '$73,000', '$75,190'],
-            ['General & Administrative', '$3,750', '$45,000', '$1.00', '6.0%', '$45,000', '$46,350', '$47,741'],
-            ['Other Expenses', '$4,875', '$58,500', '$1.30', '7.8%', '$58,500', '$60,255', '$62,063'],
-            ['Total Expenses', '$62,531', '$750,367', '$16.67', '100.0%', '$750,367', '$772,885', '$796,071']
-          ]
-        };
-      case 'closing cost':
-        return {
-          headers: ['Item', 'Amount', '% of Purchase Price', 'Notes'],
-          rows: [
-            ['Purchase Price', '$30,000,000', '100.00%', 'Base acquisition cost'],
-            ['Title Insurance', '$62,500', '0.21%', 'Standard rate'],
-            ['Legal Fees', '$75,000', '0.25%', 'Acquisition legal team'],
-            ['Due Diligence', '$45,000', '0.15%', 'Property inspections, environmental'],
-            ['Transfer Tax', '$150,000', '0.50%', 'State and local fees'],
-            ['Loan Fees', '$225,000', '0.75%', 'Origination and processing'],
-            ['Escrow Fees', '$18,500', '0.06%', 'Standard closing costs'],
-            ['Recording Fees', '$5,000', '0.02%', 'County recording'],
-            ['Other Closing Costs', '$35,000', '0.12%', 'Miscellaneous fees'],
-            ['Total Closing Costs', '$616,000', '2.05%', 'Total acquisition costs']
-          ]
-        };
-      case 'capex':
-        return {
-          headers: ['Project', 'Budget', 'Timeline', 'Status', 'Priority', 'ROI', 'Completion %'],
-          rows: [
-            ['Lobby Renovation', '$450,000', 'Q2-Q3 2024', 'In Progress', 'High', '15%', '35%'],
-            ['HVAC Replacement', '$650,000', 'Q1-Q2 2024', 'In Progress', 'Critical', '12%', '65%'],
-            ['Elevator Modernization', '$380,000', 'Q3-Q4 2024', 'Planning', 'Medium', '8%', '5%'],
-            ['Restroom Upgrades', '$275,000', 'Q2 2024', 'Not Started', 'Medium', '9%', '0%'],
-            ['Parking Garage Repairs', '$180,000', 'Q1 2024', 'Completed', 'High', '11%', '100%'],
-            ['Roof Replacement', '$320,000', 'Q4 2024', 'Not Started', 'Medium', '7%', '0%'],
-            ['Energy Efficiency Upgrades', '$225,000', 'Q2-Q3 2024', 'Planning', 'Medium', '18%', '10%'],
-            ['Façade Improvements', '$190,000', 'Q3 2024', 'Not Started', 'Low', '6%', '0%'],
-            ['Total CapEx Budget', '$2,670,000', '2024', '-', '-', '-', '29%']
-          ]
-        };
-      case 'finance and uses':
-        return {
-          headers: ['Sources', 'Amount', '% of Total'],
-          rows: [
-            ['Senior Debt', '$21,000,000', '70.0%'],
-            ['LP Equity', '$7,500,000', '25.0%'],
-            ['GP Equity', '$1,500,000', '5.0%'],
-            ['Total Sources', '$30,000,000', '100.0%'],
-            ['', '', ''],
-            ['Uses', 'Amount', '% of Total'],
-            ['Purchase Price', '$30,000,000', '97.9%'],
-            ['Closing Costs', '$616,000', '2.1%'],
-            ['Total Uses', '$30,616,000', '100.0%']
-          ]
-        };
-      case 'sale':
-        return {
-          headers: ['Exit Assumptions', 'Value', 'Notes'],
-          rows: [
-            ['Exit Year', '5', 'Target hold period'],
-            ['Exit Cap Rate', '6.50%', 'Conservative projection'],
-            ['NOI at Sale', '$2,571,942', 'Year 5 projected NOI'],
-            ['Sale Price', '$39,568,338', 'NOI / Exit Cap Rate'],
-            ['Sale Price PSF', '$879', 'Based on 45,000 SF'],
-            ['Sale Costs', '$989,208', '2.5% of Sale Price'],
-            ['Net Sale Proceeds', '$38,579,130', 'Sale Price less costs'],
-            ['Return of Capital', '$30,000,000', 'Original investment'],
-            ['Net Profit', '$8,579,130', 'Before debt payoff'],
-            ['IRR', '14.14%', 'Project IRR'],
-            ['Cash on Cash Return', '7.20%', 'Average over hold period'],
-            ['Equity Multiple', '1.82x', 'Total return / initial investment']
-          ]
-        };
-      case 'rent comps':
-        return {
-          headers: ['Property', 'Address', 'Class', 'Size (SF)', 'Rent/SF', 'Year Built', 'Occupancy', 'Distance'],
-          rows: [
-            ['One America Plaza', '600 W Broadway', 'A+', '623,000', '$3.75', '1991', '93%', '0.2 mi'],
-            ['Symphony Towers', '750 B Street', 'A', '435,000', '$3.60', '1989', '90%', '0.4 mi'],
-            ['DiamondView Tower', '350 10th Ave', 'A', '305,000', '$3.65', '2007', '95%', '0.7 mi'],
-            ['Wells Fargo Plaza', '401 B Street', 'A', '560,000', '$3.50', '1984', '88%', '0.5 mi'],
-            ['Columbia Center', '401 W A Street', 'A', '361,000', '$3.45', '1990', '92%', '0.3 mi'],
-            ['550 Corporate Center', '550 W C Street', 'B+', '174,000', '$3.25', '1987', '85%', '0.6 mi'],
-            ['707 Broadway', '707 Broadway', 'B+', '172,000', '$3.30', '1986', '82%', '0.5 mi'],
-            ['Average', '', 'A-', '375,714', '$3.50', '1990', '89%', '0.5 mi'],
-            ['Subject Property', '502 W Broadway', 'A', '45,000', '$3.38', '1985', '92%', '-']
-          ]
-        };
-      default:
-        return {
-          headers: ['Column 1', 'Column 2', 'Column 3', 'Column 4'],
-          rows: [
-            ['Data 1', 'Data 2', 'Data 3', 'Data 4'],
-            ['Data 5', 'Data 6', 'Data 7', 'Data 8']
-          ]
-        };
-    }
-  };
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [data, setData] = useState(getExcelData());
-  const [editCell, setEditCell] = useState<{row: number, col: number, value: string} | null>(null);
-
-  // Function to handle editing a cell
-  const handleCellEdit = (rowIndex: number, colIndex: number, value: string) => {
-    const newData = {...data};
-    const newRows = [...newData.rows];
-    
-    // Update the specific cell
-    newRows[rowIndex] = [...newRows[rowIndex]];
-    newRows[rowIndex][colIndex] = value;
-    
-    // Update state
-    setData({...newData, rows: newRows});
-    setEditCell(null);
-  };
-
-  // Function to handle clicks on cells
-  const handleCellClick = (rowIndex: number, colIndex: number, value: string) => {
-    if (isEditing) {
-      setEditCell({row: rowIndex, col: colIndex, value});
-    }
-  };
-
-  // Function to handle toggling edit mode
-  const toggleEditMode = () => {
-    setIsEditing(!isEditing);
-    setEditCell(null);
-  };
-
-  return (
-    <div className="bg-white p-4 border border-gray-200 rounded-r-lg">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-900">{label} Data</h3>
-        <div>
-          <button className="text-sm text-blue-600 hover:text-blue-800 mr-4">
-            <svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Export
-          </button>
-          <button 
-            className={`text-sm ${isEditing ? 'text-green-600 hover:text-green-800' : 'text-blue-600 hover:text-blue-800'}`}
-            onClick={toggleEditMode}
-          >
-            {isEditing ? (
-              <>
-                <svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Done Editing
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-                Edit
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-      
-      {isEditing && (
-        <div className="bg-blue-50 p-3 mb-4 rounded-md border border-blue-200">
-          <p className="text-sm text-blue-700 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Click on any cell to edit its value. Click "Done Editing" when finished.
-          </p>
-        </div>
-      )}
-      
-      <div className="overflow-x-auto">
-        <div className="excel-sheet border border-gray-200">
-          {/* Excel Header Row (Column Labels) */}
-          <div className="excel-header grid" style={{ gridTemplateColumns: `repeat(${data.headers.length}, minmax(100px, 1fr))` }}>
-            {data.headers.map((header, index) => (
-              <div key={`header-${index}`} className="excel-cell font-semibold bg-gray-100 p-2 border-b border-r border-gray-300">
-                {header}
-              </div>
-            ))}
-          </div>
-          
-          {/* Excel Data Rows */}
-          {data.rows.map((row, rowIndex) => (
-            <div 
-              key={`row-${rowIndex}`} 
-              className="excel-row grid" 
-              style={{ gridTemplateColumns: `repeat(${data.headers.length}, minmax(100px, 1fr))` }}
-            >
-              {row.map((cell, cellIndex) => (
-                editCell && editCell.row === rowIndex && editCell.col === cellIndex ? (
-                  <div 
-                    key={`cell-${rowIndex}-${cellIndex}`}
-                    className="excel-cell p-2 border-b border-r border-gray-300 bg-blue-50"
-                  >
-                    <input
-                      type="text"
-                      className="w-full p-1 border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={editCell.value}
-                      onChange={(e) => setEditCell({...editCell, value: e.target.value})}
-                      onBlur={() => handleCellEdit(rowIndex, cellIndex, editCell.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleCellEdit(rowIndex, cellIndex, editCell.value);
-                        }
-                      }}
-                      autoFocus
-                      aria-label={`Edit ${data.headers[cellIndex]}, row ${rowIndex + 1}`}
-                      title={`Edit ${data.headers[cellIndex]}, row ${rowIndex + 1}`}
-                      placeholder={`Enter value for ${data.headers[cellIndex]}`}
-                    />
-                  </div>
-                ) : (
-                  <div 
-                    key={`cell-${rowIndex}-${cellIndex}`}
-                    className={`excel-cell p-2 border-b border-r border-gray-300 ${
-                      cellIndex === 0 || rowIndex === 0 ? 'font-medium' : ''
-                    } ${
-                      rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                    } ${
-                      isEditing ? 'cursor-pointer hover:bg-blue-50' : ''
-                    }`}
-                    onClick={() => handleCellClick(rowIndex, cellIndex, cell)}
-                  >
-                    {cell}
-                  </div>
-                )
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="text-gray-500 text-sm mt-4 flex justify-between items-center">
-        <div>
-          <span className="font-medium">Sheet:</span> {label} • 
-          <span className="font-medium ml-2">Rows:</span> {data.rows.length} • 
-          <span className="font-medium ml-2">Columns:</span> {data.headers.length}
-        </div>
-        {isEditing && (
-          <div className="text-blue-600 text-xs">
-            Click on cells to edit
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const FinancialMetricCard: React.FC<FinancialMetricCardProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  info,
-  editable = true
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
-
-  const handleClick = () => {
-    if (editable) {
-      setIsEditing(true);
-    }
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    onChange(inputValue);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setIsEditing(false);
-      onChange(inputValue);
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-gray-600">
-          {label} {info && <span className="ml-1 text-gray-400 cursor-help" title={info}>?</span>}
-        </div>
-        {editable && (
-          <button 
-            onClick={() => setIsEditing(true)}
-            className="text-blue-600 hover:text-blue-800 text-xs"
-            aria-label={`Edit ${label}`}
-            title={`Edit ${label}`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-          </button>
-        )}
-      </div>
-      <div className="mt-1" onClick={handleClick}>
-        {isEditing ? (
-          <input
-            type="text"
-            className="w-full text-xl font-semibold text-gray-900 border-b border-blue-500 focus:outline-none"
-            value={inputValue}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            aria-label={`${label} value`}
-            title={`${label} value`}
-            placeholder={`Enter ${label}`}
-          />
-        ) : (
-          <div className="text-xl font-semibold text-gray-900 cursor-pointer">
-            {value}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const FinancialHub: React.FC<FinancialHubProps> = ({ propertyName }) => {
-  // Financial metrics from the image
-  const [financialData, setFinancialData] = useState({
-    purchasePrice: "$30MM",
-    whisperPrice: "$30MM",
-    cashOnCash: "7.20%",
-    irr: "14.14%",
-    totalInvestorReturn: "81.89%",
-    holdingPeriod: "5",
-    entryCap: "6.90%",
-    marketCap: "6%",
-    exitCap: "6.50%",
-    exitValue: "$39.57MM",
-    loanInterestRate: "5.5%",
-    dscr: "2.01"
+  // Summary metrics state
+  const [summaryMetrics] = useState({
+    purchasePrice: '$5,200,000',
+    noi: '$312,000',
+    capRate: '6.0%',
+    cashOnCash: '7.2%'
   });
 
-  const updateFinancialData = (key: string, value: string) => {
-    setFinancialData({
-      ...financialData,
-      [key]: value
-    });
+  // Property details state
+  const [propertyDetails] = useState({
+    name: 'River Street Plaza',
+    address: '522 River St',
+    cityStateZip: 'Boston, MA 02126',
+    purchaseDate: 'Mar 15, 2023',
+    propertyType: 'Multi-Family',
+    yearBuilt: '1992',
+    units: '28',
+    fund: 'Evolston Capital Fund I'
+  });
+
+  // Use a different ref for each category to prevent conflicts
+  const incomeExcelRef = useRef<any>(null);
+  const expensesExcelRef = useRef<any>(null);
+  const financingExcelRef = useRef<any>(null);
+  const marketExcelRef = useRef<any>(null);
+  const financialExcelRef = useRef<any>(null);
+  const acquisitionExcelRef = useRef<any>(null);
+  const taxExcelRef = useRef<any>(null);
+  
+  // Get the current active ref based on category
+  const getCurrentRef = () => {
+    switch (activeMainCategory) {
+      case 'property':
+        switch (activeSubCategory) {
+          case 'income': return incomeExcelRef;
+          case 'expenses': return expensesExcelRef;
+          case 'financing': return financingExcelRef;
+          case 'market': return marketExcelRef;
+          default: return incomeExcelRef;
+        }
+      case 'financial': return financialExcelRef;
+      case 'acquisition': return acquisitionExcelRef;
+      case 'tax': return taxExcelRef;
+      default: return incomeExcelRef;
+    }
   };
 
-  // Function to get initial data for each sheet type
+  // Function to get initial data for sheets
   const getInitialDataForSheet = (sheetId: string) => {
-    switch (sheetId) {
-      case 'property':
-        return [
-          ['Property Name', 'Address', 'City', 'State', 'Zip', 'Property Type', 'Year Built', 'Square Footage'],
-          ['West Broadway 502', '502 West Broadway', 'San Diego', 'CA', '92101', 'Office', '1985', '45,000'],
-          ['Property Details', '', '', '', '', '', '', ''],
-          ['Purchase Date', 'May 2022', '', '', '', '', '', ''],
-          ['Ownership Type', 'Fee Simple', '', '', '', '', '', ''],
-          ['Land Area (acres)', '0.75', '', '', '', '', '', ''],
-          ['Parking Spaces', '112', '', '', '', '', '', ''],
-          ['Occupancy Rate', '92%', '', '', '', '', '', ''],
-          ['Property Manager', 'Evolston PM', '', '', '', '', '', ''],
-          ['Notes', 'Class A office building with recent renovations', '', '', '', '', '', '']
-        ];
-      case 'unitMix':
-        return [
-          ['Unit Type', 'Count', 'SF/Unit', 'Total SF', 'Rent/SF', 'Monthly Rent', 'Annual Rent', 'Occupancy'],
-          ['Suite 100', '1', '5,500', '5,500', '$3.25', '$17,875', '$214,500', '100%'],
-          ['Suite 200', '1', '8,250', '8,250', '$3.40', '$28,050', '$336,600', '100%'],
-          ['Suite 300', '1', '8,250', '8,250', '$3.35', '$27,638', '$331,650', '100%'],
-          ['Suite 400', '1', '8,250', '8,250', '$3.50', '$28,875', '$346,500', '75%'],
-          ['Suite 500', '1', '8,250', '8,250', '$3.45', '$28,463', '$341,550', '100%'],
-          ['Suite 600', '1', '6,500', '6,500', '$3.30', '$21,450', '$257,400', '80%'],
-          ['Totals', '6', '-', '45,000', '$3.38', '$152,350', '$1,828,200', '92%']
-        ];
-      case 'income':
-        return [
-          ['Income Item', 'Monthly', 'Annual', 'PSF', '% of Total', 'Year 1', 'Year 2', 'Year 3'],
-          ['Base Rent', '$152,350', '$1,828,200', '$40.63', '87.5%', '$1,828,200', '$1,883,046', '$1,939,537'],
-          ['Expense Reimbursements', '$18,750', '$225,000', '$5.00', '10.8%', '$225,000', '$231,750', '$238,703'],
-          ['Parking Income', '$2,800', '$33,600', '$0.75', '1.6%', '$33,600', '$34,608', '$35,646'],
-          ['Other Income', '$250', '$3,000', '$0.07', '0.1%', '$3,000', '$3,090', '$3,183'],
-          ['Vacancy', '($10,640)', '($127,680)', '($2.84)', '-6.1%', '($127,680)', '($131,510)', '($135,456)'],
-          ['Total Income', '$163,510', '$1,962,120', '$43.60', '100.0%', '$1,962,120', '$2,020,984', '$2,081,613']
-        ];
-      case 'expense':
-        return [
-          ['Expense Item', 'Monthly', 'Annual', 'PSF', '% of Total', 'Year 1', 'Year 2', 'Year 3'],
-          ['Property Tax', '$16,875', '$202,500', '$4.50', '27.0%', '$202,500', '$208,575', '$214,832'],
-          ['Insurance', '$5,625', '$67,500', '$1.50', '9.0%', '$67,500', '$69,525', '$71,611'],
-          ['Utilities', '$11,250', '$135,000', '$3.00', '18.0%', '$135,000', '$139,050', '$143,222'],
-          ['Repairs & Maintenance', '$7,500', '$90,000', '$2.00', '12.0%', '$90,000', '$92,700', '$95,481'],
-          ['Janitorial', '$6,750', '$81,000', '$1.80', '10.8%', '$81,000', '$83,430', '$85,933'],
-          ['Management Fee', '$5,906', '$70,867', '$1.57', '9.5%', '$70,867', '$73,000', '$75,190'],
-          ['General & Administrative', '$3,750', '$45,000', '$1.00', '6.0%', '$45,000', '$46,350', '$47,741'],
-          ['Other Expenses', '$4,875', '$58,500', '$1.30', '7.8%', '$58,500', '$60,255', '$62,063'],
-          ['Total Expenses', '$62,531', '$750,367', '$16.67', '100.0%', '$750,367', '$772,885', '$796,071']
-        ];
-      case 'closingCost':
-        return [
-          ['Item', 'Amount', '% of Purchase Price', 'Notes'],
-          ['Purchase Price', '$30,000,000', '100.00%', 'Base acquisition cost'],
-          ['Title Insurance', '$62,500', '0.21%', 'Standard rate'],
-          ['Legal Fees', '$75,000', '0.25%', 'Acquisition legal team'],
-          ['Due Diligence', '$45,000', '0.15%', 'Property inspections, environmental'],
-          ['Transfer Tax', '$150,000', '0.50%', 'State and local fees'],
-          ['Loan Fees', '$225,000', '0.75%', 'Origination and processing'],
-          ['Escrow Fees', '$18,500', '0.06%', 'Standard closing costs'],
-          ['Recording Fees', '$5,000', '0.02%', 'County recording'],
-          ['Other Closing Costs', '$35,000', '0.12%', 'Miscellaneous fees'],
-          ['Total Closing Costs', '$616,000', '2.05%', 'Total acquisition costs']
-        ];
-      case 'capex':
-        return [
-          ['Project', 'Budget', 'Timeline', 'Status', 'Priority', 'ROI', 'Completion %'],
-          ['Lobby Renovation', '$450,000', 'Q2-Q3 2024', 'In Progress', 'High', '15%', '35%'],
-          ['HVAC Replacement', '$650,000', 'Q1-Q2 2024', 'In Progress', 'Critical', '12%', '65%'],
-          ['Elevator Modernization', '$380,000', 'Q3-Q4 2024', 'Planning', 'Medium', '8%', '5%'],
-          ['Restroom Upgrades', '$275,000', 'Q2 2024', 'Not Started', 'Medium', '9%', '0%'],
-          ['Parking Garage Repairs', '$180,000', 'Q1 2024', 'Completed', 'High', '11%', '100%'],
-          ['Roof Replacement', '$320,000', 'Q4 2024', 'Not Started', 'Medium', '7%', '0%'],
-          ['Energy Efficiency Upgrades', '$225,000', 'Q2-Q3 2024', 'Planning', 'Medium', '18%', '10%'],
-          ['Façade Improvements', '$190,000', 'Q3 2024', 'Not Started', 'Low', '6%', '0%'],
-          ['Total CapEx Budget', '$2,670,000', '2024', '-', '-', '-', '29%']
-        ];
-      case 'finance':
-        return [
-          ['Sources', 'Amount', '% of Total'],
-          ['Senior Debt', '$21,000,000', '70.0%'],
-          ['LP Equity', '$7,500,000', '25.0%'],
-          ['GP Equity', '$1,500,000', '5.0%'],
-          ['Total Sources', '$30,000,000', '100.0%'],
-          ['', '', ''],
-          ['Uses', 'Amount', '% of Total'],
-          ['Purchase Price', '$30,000,000', '97.9%'],
-          ['Closing Costs', '$616,000', '2.1%'],
-          ['Total Uses', '$30,616,000', '100.0%']
-        ];
-      case 'sale':
-        return [
-          ['Exit Assumptions', 'Value', 'Notes'],
-          ['Exit Year', '5', 'Target hold period'],
-          ['Exit Cap Rate', '6.50%', 'Conservative projection'],
-          ['NOI at Sale', '$2,571,942', 'Year 5 projected NOI'],
-          ['Sale Price', '$39,568,338', 'NOI / Exit Cap Rate'],
-          ['Sale Price PSF', '$879', 'Based on 45,000 SF'],
-          ['Sale Costs', '$989,208', '2.5% of Sale Price'],
-          ['Net Sale Proceeds', '$38,579,130', 'Sale Price less costs'],
-          ['Return of Capital', '$30,000,000', 'Original investment'],
-          ['Net Profit', '$8,579,130', 'Before debt payoff'],
-          ['IRR', '14.14%', 'Project IRR'],
-          ['Cash on Cash Return', '7.20%', 'Average over hold period'],
-          ['Equity Multiple', '1.82x', 'Total return / initial investment']
-        ];
-      case 'rentComps':
-        return [
-          ['Property', 'Address', 'Class', 'Size (SF)', 'Rent/SF', 'Year Built', 'Occupancy', 'Distance'],
-          ['One America Plaza', '600 W Broadway', 'A+', '623,000', '$3.75', '1991', '93%', '0.2 mi'],
-          ['Symphony Towers', '750 B Street', 'A', '435,000', '$3.60', '1989', '90%', '0.4 mi'],
-          ['DiamondView Tower', '350 10th Ave', 'A', '305,000', '$3.65', '2007', '95%', '0.7 mi'],
-          ['Wells Fargo Plaza', '401 B Street', 'A', '560,000', '$3.50', '1984', '88%', '0.5 mi'],
-          ['Columbia Center', '401 W A Street', 'A', '361,000', '$3.45', '1990', '92%', '0.3 mi'],
-          ['550 Corporate Center', '550 W C Street', 'B+', '174,000', '$3.25', '1987', '85%', '0.6 mi'],
-          ['707 Broadway', '707 Broadway', 'B+', '172,000', '$3.30', '1986', '82%', '0.5 mi'],
-          ['Average', '', 'A-', '375,714', '$3.50', '1990', '89%', '0.5 mi'],
-          ['Subject Property', '502 W Broadway', 'A', '45,000', '$3.38', '1985', '92%', '-']
-        ];
-      default:
-        return [['No data available']];
-    }
+    console.log("Getting data for sheet ID:", sheetId);
+    const initialData = {
+      'income': [
+        ['Income Statement', '2023', '2022', 'Change', '2024 (Proj.)'],
+        ['Revenue', '', '', '', ''],
+        ['Rental Income - Residential', '$1,560,000', '$1,450,000', '7.6%', '$1,680,000'],
+        ['Rental Income - Parking', '$48,000', '$45,000', '6.7%', '$50,000'],
+        ['Other Income', '$35,000', '$32,000', '9.4%', '$38,000'],
+        ['Gross Potential Income', '$1,643,000', '$1,527,000', '7.6%', '$1,768,000'],
+        ['', '', '', '', ''],
+        ['Less:', '', '', '', ''],
+        ['Vacancy Loss', '($82,150)', '($91,620)', '-10.3%', '($70,720)'],
+        ['Concessions', '($16,430)', '($15,270)', '7.6%', '($17,680)'],
+        ['Bad Debt', '($8,215)', '($7,635)', '7.6%', '($8,840)'],
+        ['Effective Gross Income', '$1,536,205', '$1,412,475', '8.8%', '$1,670,760'],
+        ['', '', '', '', ''],
+        ['Operating Expenses', '', '', '', ''],
+        ['Property Management', '($76,810)', '($70,624)', '8.8%', '($83,538)'],
+        ['Maintenance & Repairs', '($153,621)', '($141,248)', '8.8%', '($167,076)'],
+        ['Utilities', '($92,172)', '($84,749)', '8.8%', '($100,246)'],
+        ['Property Tax', '($184,345)', '($169,497)', '8.8%', '($200,491)'],
+        ['Insurance', '($46,086)', '($42,374)', '8.8%', '($50,123)'],
+        ['Marketing', '($15,362)', '($14,125)', '8.8%', '($16,708)'],
+        ['Administrative', '($30,724)', '($28,250)', '8.8%', '($33,415)'],
+        ['Total Operating Expenses', '($599,120)', '($550,867)', '8.8%', '($651,597)'],
+        ['', '', '', '', ''],
+        ['Net Operating Income (NOI)', '$937,085', '$861,608', '8.8%', '$1,019,163'],
+        ['NOI Margin', '61.0%', '61.0%', '0.0%', '61.0%']
+      ],
+      'expenses': [
+        ['Expense Analysis', '2023', '2022', 'Change', '2024 (Proj.)'],
+        ['Operating Expenses', '', '', '', ''],
+        ['Property Management', '$76,810', '$70,624', '8.8%', '$83,538'],
+        ['Maintenance & Repairs', '$153,621', '$141,248', '8.8%', '$167,076'],
+        ['Utilities Breakdown:', '', '', '', ''],
+        ['- Electricity', '$36,869', '$33,899', '8.8%', '$40,098'],
+        ['- Water/Sewer', '$27,652', '$25,425', '8.8%', '$30,074'],
+        ['- Gas', '$27,652', '$25,425', '8.8%', '$30,074'],
+        ['Total Utilities', '$92,172', '$84,749', '8.8%', '$100,246'],
+        ['', '', '', '', ''],
+        ['Fixed Expenses', '', '', '', ''],
+        ['Property Tax', '$184,345', '$169,497', '8.8%', '$200,491'],
+        ['Insurance Breakdown:', '', '', '', ''],
+        ['- Property Insurance', '$36,869', '$33,899', '8.8%', '$40,098'],
+        ['- Liability Insurance', '$9,217', '$8,475', '8.8%', '$10,025'],
+        ['Total Insurance', '$46,086', '$42,374', '8.8%', '$50,123'],
+        ['', '', '', '', ''],
+        ['Administrative', '', '', '', ''],
+        ['Marketing', '$15,362', '$14,125', '8.8%', '$16,708'],
+        ['Office Expenses', '$15,362', '$14,125', '8.8%', '$16,708'],
+        ['Professional Fees', '$15,362', '$14,125', '8.8%', '$16,708'],
+        ['Total Administrative', '$46,086', '$42,374', '8.8%', '$50,123'],
+        ['', '', '', '', ''],
+        ['Total Operating Expenses', '$599,120', '$550,867', '8.8%', '$651,597'],
+        ['Per Unit Per Year', '$21,397', '$19,674', '8.8%', '$23,271'],
+        ['Per SF Per Year', '$12.48', '$11.48', '8.8%', '$13.57']
+      ],
+      'financing': [
+        ['Financing Analysis', 'Current', 'At Purchase', 'Change', 'Notes'],
+        ['Loan Details', '', '', '', ''],
+        ['Principal Balance', '$3,900,000', '$4,000,000', '-2.5%', 'Amortizing'],
+        ['Interest Rate', '4.50%', '4.50%', '0.0%', 'Fixed Rate'],
+        ['Annual Debt Service', '$285,000', '$285,000', '0.0%', 'Monthly: $23,750'],
+        ['Loan Term', '30 years', '30 years', '-', 'Original Term'],
+        ['Term Remaining', '27.3 years', '28 years', '-2.5%', '327 months left'],
+        ['', '', '', '', ''],
+        ['Annual Costs', '', '', '', ''],
+        ['Principal Payment', '$109,500', '$107,000', '2.3%', 'Increasing yearly'],
+        ['Interest Payment', '$175,500', '$178,000', '-1.4%', 'Decreasing yearly'],
+        ['Total Debt Service', '$285,000', '$285,000', '0.0%', 'Fixed payment'],
+        ['', '', '', '', ''],
+        ['Key Metrics', '', '', '', ''],
+        ['Property Value', '$5,200,000', '$5,200,000', '0.0%', 'Recent Appraisal'],
+        ['LTV Ratio', '75.0%', '76.9%', '-2.5%', 'Max: 80%'],
+        ['DSCR', '1.46', '1.38', '5.8%', 'Min Required: 1.25'],
+        ['Debt Yield', '10.6%', '9.8%', '8.2%', 'Strong performance']
+      ],
+      'market': [
+        ['Market Analysis', 'Subject', 'Market Avg', 'Variance', 'Submarket'],
+        ['Rental Rates ($/SF/Year)', '', '', '', ''],
+        ['Studio', '$32.50', '$31.00', '4.8%', '$31.50'],
+        ['1 Bedroom', '$30.00', '$28.50', '5.3%', '$29.00'],
+        ['2 Bedroom', '$27.50', '$26.00', '5.8%', '$26.50'],
+        ['3 Bedroom', '$25.00', '$23.50', '6.4%', '$24.00'],
+        ['Average Rate', '$28.75', '$27.25', '5.5%', '$27.75'],
+        ['', '', '', '', ''],
+        ['Occupancy Rates', '', '', '', ''],
+        ['Studio', '95%', '92%', '3.3%', '93%'],
+        ['1 Bedroom', '96%', '93%', '3.2%', '94%'],
+        ['2 Bedroom', '94%', '91%', '3.3%', '92%'],
+        ['3 Bedroom', '92%', '89%', '3.4%', '90%'],
+        ['Overall Occupancy', '94.3%', '91.3%', '3.3%', '92.3%'],
+        ['', '', '', '', ''],
+        ['Market Metrics', '', '', '', ''],
+        ['Cap Rate', '6.0%', '5.8%', '3.4%', '5.9%'],
+        ['Price per Unit', '$185,714', '$175,000', '6.1%', '$180,000'],
+        ['Price per SF', '$325', '$315', '3.2%', '$320'],
+        ['', '', '', '', ''],
+        ['Demographics (1 Mile)', '', '', '', ''],
+        ['Population', '25,000', '-', '-', 'Growing'],
+        ['Median Income', '$75,000', '$72,000', '4.2%', '$73,500'],
+        ['Employment Rate', '96%', '94%', '2.1%', '95%'],
+        ['Population Growth', '2.3%', '1.8%', '27.8%', '2.0%']
+      ],
+      'investment': [
+        ['Investment Analysis', 'Amount', 'Per Unit', 'Per SF', 'Notes'],
+        ['Acquisition', '', '', '', ''],
+        ['Purchase Price', '$5,200,000', '$185,714', '$325.00', '28 units'],
+        ['Closing Costs', '$156,000', '$5,571', '$9.75', '3% of price'],
+        ['Initial CapEx', '$450,000', '$16,071', '$28.13', 'Renovations'],
+        ['Total Investment', '$5,806,000', '$207,357', '$362.88', ''],
+        ['', '', '', '', ''],
+        ['Financing', '', '', '', ''],
+        ['Loan Amount', '$3,900,000', '$139,286', '$243.75', '75% LTV'],
+        ['Equity Required', '$1,906,000', '$68,071', '$119.13', '25% down + costs'],
+        ['', '', '', '', ''],
+        ['Returns (Year 1)', '', '', '', ''],
+        ['NOI', '$937,085', '$33,467', '$58.57', ''],
+        ['Cash Flow', '$652,085', '$23,289', '$40.76', 'Before debt service'],
+        ['Cap Rate', '6.0%', '-', '-', 'Based on purchase'],
+        ['Cash on Cash', '7.2%', '-', '-', 'Unleveraged'],
+        ['IRR (5-year proj)', '15.8%', '-', '-', 'With disposition']
+      ],
+      'returns': [
+        ['5-Year Projections', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+        ['Operations', '', '', '', '', ''],
+        ['Gross Income', '$1,643,000', '$1,692,290', '$1,743,059', '$1,795,351', '$1,849,211'],
+        ['Vacancy Loss', '($82,150)', '($84,615)', '($87,153)', '($89,768)', '($92,461)'],
+        ['Effective Income', '$1,560,850', '$1,607,676', '$1,655,906', '$1,705,583', '$1,756,751'],
+        ['Operating Expenses', '($599,120)', '($617,094)', '($635,606)', '($654,675)', '($674,315)'],
+        ['NOI', '$937,085', '$965,198', '$994,153', '$1,023,978', '$1,054,697'],
+        ['', '', '', '', '', ''],
+        ['Debt Service', '($285,000)', '($285,000)', '($285,000)', '($285,000)', '($285,000)'],
+        ['Capital Expenditures', '($50,000)', '($51,500)', '($53,045)', '($54,636)', '($56,275)'],
+        ['Net Cash Flow', '$602,085', '$628,698', '$656,108', '$684,342', '$713,422'],
+        ['', '', '', '', '', ''],
+        ['Returns', '', '', '', '', ''],
+        ['Cash on Cash', '7.2%', '7.5%', '7.8%', '8.2%', '8.5%'],
+        ['Cumulative Cash Flow', '$602,085', '$1,230,783', '$1,886,891', '$2,571,233', '$3,284,655'],
+        ['Property Value', '$5,200,000', '$5,356,000', '$5,516,680', '$5,682,180', '$5,852,646'],
+        ['Equity Multiple', '1.07x', '1.15x', '1.23x', '1.32x', '1.41x']
+      ],
+      'balance-sheet': [
+        ['Balance Sheet', 'As of Dec 31, 2023', 'As of Dec 31, 2022', 'Change', 'Notes'],
+        ['Assets', '', '', '', ''],
+        ['Current Assets:', '', '', '', ''],
+        ['Cash and Cash Equivalents', '$250,000', '$225,000', '11.1%', 'Operating accounts'],
+        ['Accounts Receivable', '$45,000', '$42,000', '7.1%', 'Net of allowances'],
+        ['Prepaid Expenses', '$35,000', '$32,000', '9.4%', 'Insurance & property tax'],
+        ['Total Current Assets', '$330,000', '$299,000', '10.4%', ''],
+        ['', '', '', '', ''],
+        ['Fixed Assets:', '', '', '', ''],
+        ['Land', '$1,040,000', '$1,040,000', '0.0%', '20% of purchase price'],
+        ['Building', '$4,160,000', '$4,160,000', '0.0%', '80% of purchase price'],
+        ['Improvements', '$450,000', '$350,000', '28.6%', 'Renovations'],
+        ['Less: Accumulated Depreciation', '($189,091)', '($94,545)', '100.0%', 'Straight-line'],
+        ['Net Fixed Assets', '$5,460,909', '$5,455,455', '0.1%', ''],
+        ['', '', '', '', ''],
+        ['Other Assets:', '', '', '', ''],
+        ['Security Deposits Held', '$84,000', '$84,000', '0.0%', 'Tenant deposits'],
+        ['Loan Costs (Net)', '$45,000', '$48,000', '-6.3%', 'Being amortized'],
+        ['Total Other Assets', '$129,000', '$132,000', '-2.3%', ''],
+        ['', '', '', '', ''],
+        ['Total Assets', '$5,919,909', '$5,886,455', '0.6%', ''],
+        ['', '', '', '', ''],
+        ['Liabilities & Equity', '', '', '', ''],
+        ['Current Liabilities:', '', '', '', ''],
+        ['Accounts Payable', '$35,000', '$32,000', '9.4%', 'Trade payables'],
+        ['Accrued Expenses', '$25,000', '$23,000', '8.7%', 'Various accruals'],
+        ['Security Deposits', '$84,000', '$84,000', '0.0%', 'Tenant deposits'],
+        ['Total Current Liabilities', '$144,000', '$139,000', '3.6%', ''],
+        ['', '', '', '', ''],
+        ['Long-term Liabilities:', '', '', '', ''],
+        ['Mortgage Payable', '$3,900,000', '$4,000,000', '-2.5%', '30-year term'],
+        ['Total Long-term Liabilities', '$3,900,000', '$4,000,000', '-2.5%', ''],
+        ['', '', '', '', ''],
+        ['Total Liabilities', '$4,044,000', '$4,139,000', '-2.3%', ''],
+        ['', '', '', '', ''],
+        ['Equity:', '', '', '', ''],
+        ['Partner Capital', '$1,906,000', '$1,906,000', '0.0%', 'Initial investment'],
+        ['Retained Earnings', '($30,091)', '($158,545)', '-81.0%', 'Cumulative earnings'],
+        ['Total Equity', '$1,875,909', '$1,747,455', '7.4%', ''],
+        ['', '', '', '', ''],
+        ['Total Liabilities & Equity', '$5,919,909', '$5,886,455', '0.6%', '']
+      ],
+      'income-statement': [
+        ['Income Statement', '2023', '2022', 'Change', '2024 (Proj.)'],
+        ['Revenue', '', '', '', ''],
+        ['Rental Income - Residential', '$1,560,000', '$1,450,000', '7.6%', '$1,680,000'],
+        ['Rental Income - Parking', '$48,000', '$45,000', '6.7%', '$50,000'],
+        ['Other Income', '$35,000', '$32,000', '9.4%', '$38,000'],
+        ['Gross Potential Income', '$1,643,000', '$1,527,000', '7.6%', '$1,768,000'],
+        ['', '', '', '', ''],
+        ['Less:', '', '', '', ''],
+        ['Vacancy Loss', '($82,150)', '($91,620)', '-10.3%', '($70,720)'],
+        ['Concessions', '($16,430)', '($15,270)', '7.6%', '($17,680)'],
+        ['Bad Debt', '($8,215)', '($7,635)', '7.6%', '($8,840)'],
+        ['Effective Gross Income', '$1,536,205', '$1,412,475', '8.8%', '$1,670,760'],
+        ['', '', '', '', ''],
+        ['Operating Expenses', '', '', '', ''],
+        ['Property Management', '($76,810)', '($70,624)', '8.8%', '($83,538)'],
+        ['Maintenance & Repairs', '($153,621)', '($141,248)', '8.8%', '($167,076)'],
+        ['Utilities', '($92,172)', '($84,749)', '8.8%', '($100,246)'],
+        ['Property Tax', '($184,345)', '($169,497)', '8.8%', '($200,491)'],
+        ['Insurance', '($46,086)', '($42,374)', '8.8%', '($50,123)'],
+        ['Marketing', '($15,362)', '($14,125)', '8.8%', '($16,708)'],
+        ['Administrative', '($30,724)', '($28,250)', '8.8%', '($33,415)'],
+        ['Total Operating Expenses', '($599,120)', '($550,867)', '8.8%', '($651,597)'],
+        ['', '', '', '', ''],
+        ['Net Operating Income (NOI)', '$937,085', '$861,608', '8.8%', '$1,019,163'],
+        ['NOI Margin', '61.0%', '61.0%', '0.0%', '61.0%']
+      ],
+      'cash-flow': [
+        ['Cash Flow Statement', '2023', '2022', 'Change', '2024 (Proj.)'],
+        ['Operating Activities', '', '', '', ''],
+        ['Net Operating Income', '$937,085', '$861,608', '8.8%', '$1,019,163'],
+        ['Non-Cash Adjustments:', '', '', '', ''],
+        ['Depreciation & Amortization', '$94,546', '$94,545', '0.0%', '$94,546'],
+        ['Changes in Working Capital:', '', '', '', ''],
+        ['(Increase)/Decrease in Accounts Receivable', '($3,000)', '($5,000)', '-40.0%', '($2,000)'],
+        ['(Increase)/Decrease in Prepaid Expenses', '($3,000)', '$2,000', '-250.0%', '($1,500)'],
+        ['Increase/(Decrease) in Accounts Payable', '$3,000', '($2,000)', '-250.0%', '$1,500'],
+        ['Increase/(Decrease) in Accrued Expenses', '$2,000', '$1,000', '100.0%', '$1,000'],
+        ['Net Cash from Operating Activities', '$1,030,631', '$952,153', '8.2%', '$1,112,709'],
+        ['', '', '', '', ''],
+        ['Investing Activities', '', '', '', ''],
+        ['Capital Expenditures', '($100,000)', '($95,000)', '5.3%', '($110,000)'],
+        ['Building Improvements', '($50,000)', '($35,000)', '42.9%', '($45,000)'],
+        ['Net Cash from Investing Activities', '($150,000)', '($130,000)', '15.4%', '($155,000)'],
+        ['', '', '', '', ''],
+        ['Financing Activities', '', '', '', ''],
+        ['Principal Payments on Mortgage', '($100,000)', '($95,000)', '5.3%', '($105,000)'],
+        ['Interest Payments', '($175,500)', '($178,000)', '-1.4%', '($172,000)'],
+        ['Distributions to Owners', '($600,000)', '($500,000)', '20.0%', '($700,000)'],
+        ['Net Cash from Financing Activities', '($875,500)', '($773,000)', '13.3%', '($977,000)'],
+        ['', '', '', '', ''],
+        ['Net Change in Cash', '$5,131', '$49,153', '-89.6%', '($19,291)'],
+        ['Beginning Cash Balance', '$245,000', '$195,847', '25.1%', '$250,131'],
+        ['Ending Cash Balance', '$250,131', '$245,000', '2.1%', '$230,840']
+      ],
+      'budget': [
+        ['Annual Budget', '2024 Budget', '2023 Actual', 'Variance', 'Notes'],
+        ['Revenue', '', '', '', ''],
+        ['Rental Income - Residential', '$1,680,000', '$1,560,000', '7.7%', 'Assumes 3% rent increase'],
+        ['Rental Income - Parking', '$50,000', '$48,000', '4.2%', 'Assumes full occupancy'],
+        ['Other Income', '$38,000', '$35,000', '8.6%', 'Includes laundry & fees'],
+        ['Gross Potential Income', '$1,768,000', '$1,643,000', '7.6%', ''],
+        ['', '', '', '', ''],
+        ['Less:', '', '', '', ''],
+        ['Vacancy Loss', '($70,720)', '($82,150)', '-13.9%', 'Assumes 4% vacancy rate'],
+        ['Concessions', '($17,680)', '($16,430)', '7.6%', 'New resident specials'],
+        ['Bad Debt', '($8,840)', '($8,215)', '7.6%', 'Based on historical rate'],
+        ['Effective Gross Income', '$1,670,760', '$1,536,205', '8.8%', ''],
+        ['', '', '', '', ''],
+        ['Operating Expenses', '', '', '', ''],
+        ['Property Management', '($83,538)', '($76,810)', '8.8%', '5% of EGI'],
+        ['Maintenance & Repairs', '($150,000)', '($153,621)', '-2.4%', 'Reduced due to recent updates'],
+        ['Utilities', '($100,246)', '($92,172)', '8.8%', 'Utility increases expected'],
+        ['Property Tax', '($200,491)', '($184,345)', '8.8%', 'Assessed value increase'],
+        ['Insurance', '($50,123)', '($46,086)', '8.8%', 'Policy renewal with increase'],
+        ['Marketing', '($16,708)', '($15,362)', '8.8%', 'Digital campaigns increase'],
+        ['Administrative', '($33,415)', '($30,724)', '8.8%', 'Includes software costs'],
+        ['Total Operating Expenses', '($634,521)', '($599,120)', '5.9%', ''],
+        ['', '', '', '', ''],
+        ['Net Operating Income (NOI)', '$1,036,239', '$937,085', '10.6%', ''],
+        ['', '', '', '', ''],
+        ['Capital Expenditures', '', '', '', ''],
+        ['Unit Renovations', '($75,000)', '($50,000)', '50.0%', '5 units planned'],
+        ['Common Area Improvements', '($40,000)', '($25,000)', '60.0%', 'Lobby renovation'],
+        ['Building Systems', '($35,000)', '($25,000)', '40.0%', 'HVAC upgrades'],
+        ['Total CapEx', '($150,000)', '($100,000)', '50.0%', '']
+      ],
+      'variance': [
+        ['Variance Analysis', 'YTD Actual', 'YTD Budget', 'Variance ($)', 'Variance (%)', 'Notes'],
+        ['Revenue', '', '', '', '', ''],
+        ['Rental Income - Residential', '$780,000', '$800,000', '($20,000)', '-2.5%', 'Slightly below target'],
+        ['Rental Income - Parking', '$24,000', '$23,000', '$1,000', '4.3%', 'Better than expected'],
+        ['Other Income', '$17,500', '$18,000', '($500)', '-2.8%', 'Lower fee collection'],
+        ['Gross Potential Income', '$821,500', '$841,000', '($19,500)', '-2.3%', ''],
+        ['', '', '', '', '', ''],
+        ['Less:', '', '', '', '', ''],
+        ['Vacancy Loss', '($41,075)', '($33,640)', '($7,435)', '22.1%', 'Higher vacancies Q2'],
+        ['Concessions', '($8,215)', '($8,410)', '$195', '-2.3%', 'Fewer move-in specials needed'],
+        ['Bad Debt', '($4,108)', '($4,205)', '$97', '-2.3%', 'Improved tenant screening'],
+        ['Effective Gross Income', '$768,102', '$794,745', '($26,643)', '-3.4%', ''],
+        ['', '', '', '', '', ''],
+        ['Operating Expenses', '', '', '', '', ''],
+        ['Property Management', '($38,405)', '($39,737)', '$1,332', '-3.4%', 'Tied to EGI'],
+        ['Maintenance & Repairs', '($78,000)', '($75,000)', '($3,000)', '4.0%', 'HVAC repairs in Q2'],
+        ['Utilities', '($51,000)', '($48,000)', '($3,000)', '6.3%', 'Increased water costs'],
+        ['Property Tax', '($92,173)', '($92,173)', '$0', '0.0%', 'On budget'],
+        ['Insurance', '($23,043)', '($23,043)', '$0', '0.0%', 'On budget'],
+        ['Marketing', '($8,500)', '($7,500)', '($1,000)', '13.3%', 'New digital campaign'],
+        ['Administrative', '($15,362)', '($16,000)', '$638', '-4.0%', 'Cost savings'],
+        ['Total Operating Expenses', '($306,483)', '($301,453)', '($5,030)', '1.7%', ''],
+        ['', '', '', '', '', ''],
+        ['Net Operating Income (NOI)', '$461,619', '$493,292', '($31,673)', '-6.4%', 'Action plan in progress'],
+        ['', '', '', '', '', ''],
+        ['Key Metrics', '', '', '', '', ''],
+        ['NOI Margin', '60.1%', '62.1%', '-2.0%', '-3.2%', ''],
+        ['Expense Ratio', '39.9%', '37.9%', '2.0%', '5.3%', '']
+      ],
+      'summary': [
+        ['Acquisition Summary', 'Value', 'Per Unit', 'Per SF', 'Notes'],
+        ['Property Details', '', '', '', ''],
+        ['Purchase Price', '$5,200,000', '$185,714', '$325.00', '28 units, 16,000 SF'],
+        ['Purchase Date', 'Mar 15, 2023', '', '', ''],
+        ['Property Type', 'Multi-Family', '', '', 'Class B'],
+        ['Location', 'Boston, MA', '', '', 'Growing submarket'],
+        ['Building Age', '31 years', '', '', 'Built 1992, renovated 2015'],
+        ['', '', '', '', ''],
+        ['Financial Metrics', '', '', '', ''],
+        ['Year 1 NOI', '$937,085', '$33,467', '$58.57', 'Stabilized'],
+        ['Cap Rate', '6.0%', '', '', 'Market average: 5.8%'],
+        ['Going-in Cap Rate', '5.85%', '', '', 'Before improvements'],
+        ['Cash-on-Cash Return', '7.2%', '', '', 'Year 1'],
+        ['IRR (5-Year)', '15.8%', '', '', 'With disposition'],
+        ['Equity Multiple', '1.85x', '', '', '5-year hold'],
+        ['', '', '', '', ''],
+        ['Investment Structure', '', '', '', ''],
+        ['Total Capitalization', '$5,806,000', '$207,357', '$362.88', 'Including closing costs'],
+        ['Debt', '$3,900,000', '$139,286', '$243.75', '75% LTV, 4.5% interest'],
+        ['Equity', '$1,906,000', '$68,071', '$119.13', 'Single investor'],
+        ['', '', '', '', ''],
+        ['Business Plan', '', '', '', ''],
+        ['Strategy', 'Value-Add', '', '', 'Moderate renovation'],
+        ['Hold Period', '5 years', '', '', 'Target disposition: 2028'],
+        ['Exit Cap Rate', '5.75%', '', '', 'Conservative projection'],
+        ['Projected Exit Value', '$5,997,000', '$214,179', '$374.81', 'Based on NOI growth']
+      ],
+      'scenarios': [
+        ['Investment Scenarios', 'Base Case', 'Optimistic', 'Conservative', 'Notes'],
+        ['Assumptions', '', '', '', ''],
+        ['Rental Growth (Annual)', '3.0%', '4.5%', '2.0%', 'Market average: 3.2%'],
+        ['Expense Growth (Annual)', '2.5%', '2.0%', '3.0%', 'Inflation expectations'],
+        ['Vacancy Rate', '4.0%', '3.0%', '5.0%', 'Current: 4.2%'],
+        ['Exit Cap Rate', '5.75%', '5.5%', '6.0%', 'Current: 6.0%'],
+        ['Renovation Cost', '$450,000', '$400,000', '$500,000', '$16K/unit average'],
+        ['', '', '', '', ''],
+        ['5-Year Projections', '', '', '', ''],
+        ['Year 5 NOI', '$1,058,000', '$1,146,000', '$978,000', ''],
+        ['Exit Value', '$18,397,000', '$20,836,000', '$16,300,000', 'Based on exit cap'],
+        ['Total Cash Flow', '$2,684,000', '$3,157,000', '$2,247,000', '5-year cumulative'],
+        ['', '', '', '', ''],
+        ['Returns', '', '', '', ''],
+        ['IRR', '15.8%', '19.4%', '12.6%', 'Target: 15%+'],
+        ['Equity Multiple', '1.85x', '2.14x', '1.62x', 'Target: 1.8x+'],
+        ['Average Cash Yield', '7.8%', '9.1%', '6.5%', 'Years 1-5'],
+        ['', '', '', '', ''],
+        ['Risk Factors', '', '', '', ''],
+        ['Market Risk', 'Medium', 'Low', 'High', 'Boston market stability'],
+        ['Execution Risk', 'Medium', 'Low', 'Medium', 'Renovation complexity'],
+        ['Interest Rate Risk', 'Low', 'Low', 'High', 'Fixed rate debt in place']
+      ],
+      'comparables': [
+        ['Comparable Properties', 'Subject', 'Comp 1', 'Comp 2', 'Comp 3', 'Comp 4'],
+        ['Property Details', '', '', '', '', ''],
+        ['Address', '522 River St', '450 Main St', '78 Commonwealth', '221 Beacon St', '118 Newbury St'],
+        ['Property Type', 'Multi-Family', 'Multi-Family', 'Multi-Family', 'Multi-Family', 'Multi-Family'],
+        ['Year Built', '1992', '1995', '1988', '2001', '1986'],
+        ['Units', '28', '32', '24', '36', '22'],
+        ['Total SF', '16,000', '18,400', '13,900', '21,600', '12,100'],
+        ['Avg Unit Size (SF)', '571', '575', '579', '600', '550'],
+        ['', '', '', '', '', ''],
+        ['Transaction Details', '', '', '', '', ''],
+        ['Sale Date', 'Mar 2023', 'Jan 2023', 'Nov 2022', 'Aug 2022', 'May 2022'],
+        ['Sale Price', '$5,200,000', '$5,650,000', '$4,450,000', '$7,200,000', '$3,850,000'],
+        ['Price per Unit', '$185,714', '$176,563', '$185,417', '$200,000', '$175,000'],
+        ['Price per SF', '$325', '$307', '$320', '$333', '$318'],
+        ['Cap Rate', '6.0%', '5.8%', '5.9%', '5.6%', '6.1%'],
+        ['', '', '', '', '', ''],
+        ['Income/Expenses (per Unit)', '', '', '', '', ''],
+        ['Annual Income', '$55,393', '$52,969', '$53,750', '$58,333', '$51,364'],
+        ['Expenses', '$21,925', '$20,594', '$20,417', '$22,222', '$19,773'],
+        ['NOI', '$33,467', '$32,375', '$33,333', '$36,111', '$31,591'],
+        ['', '', '', '', '', ''],
+        ['Notes', 'Value-add opportunity', 'Recent renovation', 'Older finishes', 'Premium location', 'Smaller units']
+      ],
+      'projections': [
+        ['Tax Projections', '2023', '2024', '2025', '2026', '2027'],
+        ['Income', '', '', '', '', ''],
+        ['Rental Income', '$1,560,000', '$1,606,800', '$1,655,004', '$1,704,654', '$1,755,794'],
+        ['Other Income', '$83,000', '$85,490', '$88,055', '$90,696', '$93,417'],
+        ['Total Income', '$1,643,000', '$1,692,290', '$1,743,059', '$1,795,350', '$1,849,211'],
+        ['', '', '', '', '', ''],
+        ['Deductible Expenses', '', '', '', '', ''],
+        ['Operating Expenses', '$599,120', '$617,094', '$635,606', '$654,675', '$674,315'],
+        ['Mortgage Interest', '$175,500', '$172,000', '$168,500', '$165,000', '$161,500'],
+        ['Property Tax', '$184,345', '$189,875', '$195,572', '$201,439', '$207,482'],
+        ['Insurance', '$46,086', '$47,469', '$48,893', '$50,360', '$51,870'],
+        ['', '', '', '', '', ''],
+        ['Depreciation', '', '', '', '', ''],
+        ['Building (27.5 years)', '$151,273', '$151,273', '$151,273', '$151,273', '$151,273'],
+        ['Land Improvements (15 years)', '$34,667', '$34,667', '$34,667', '$34,667', '$34,667'],
+        ['Personal Property (5 years)', '$10,400', '$16,640', '$10,000', '$6,000', '$3,600'],
+        ['Total Depreciation', '$196,340', '$202,580', '$195,940', '$191,940', '$189,540'],
+        ['', '', '', '', '', ''],
+        ['Taxable Income', '', '', '', '', ''],
+        ['Net Operating Income', '$937,085', '$965,198', '$994,153', '$1,023,978', '$1,054,697'],
+        ['Less: Interest', '($175,500)', '($172,000)', '($168,500)', '($165,000)', '($161,500)'],
+        ['Less: Depreciation', '($196,340)', '($202,580)', '($195,940)', '($191,940)', '($189,540)'],
+        ['Taxable Income', '$565,245', '$590,618', '$629,713', '$667,038', '$703,657'],
+        ['', '', '', '', '', ''],
+        ['Estimated Tax (21%)', '$118,701', '$124,030', '$132,240', '$140,078', '$147,768']
+      ],
+      'depreciation': [
+        ['Depreciation Schedule', 'Cost Basis', 'Recovery Period', 'Method', '2023', '2024', '2025', '2026', '2027'],
+        ['Building Components', '', '', '', '', '', '', '', ''],
+        ['Building Shell', '$4,160,000', '27.5 years', 'Straight Line', '$151,273', '$151,273', '$151,273', '$151,273', '$151,273'],
+        ['', '', '', '', '', '', '', '', ''],
+        ['Land Improvements', '', '', '', '', '', '', '', ''],
+        ['Parking Lot', '$150,000', '15 years', 'Straight Line', '$10,000', '$10,000', '$10,000', '$10,000', '$10,000'],
+        ['Landscaping', '$75,000', '15 years', 'Straight Line', '$5,000', '$5,000', '$5,000', '$5,000', '$5,000'],
+        ['Fencing', '$45,000', '15 years', 'Straight Line', '$3,000', '$3,000', '$3,000', '$3,000', '$3,000'],
+        ['Swimming Pool', '$125,000', '15 years', 'Straight Line', '$8,333', '$8,333', '$8,333', '$8,333', '$8,333'],
+        ['Site Lighting', '$125,000', '15 years', 'Straight Line', '$8,333', '$8,333', '$8,333', '$8,333', '$8,333'],
+        ['Total Land Improvements', '$520,000', '', '', '$34,667', '$34,667', '$34,667', '$34,667', '$34,667'],
+        ['', '', '', '', '', '', '', '', ''],
+        ['Personal Property', '', '', '', '', '', '', '', ''],
+        ['Appliances', '$28,000', '5 years', 'MACRS', '$5,600', '$8,960', '$5,376', '$3,226', '$1,936'],
+        ['Flooring', '$15,000', '5 years', 'MACRS', '$3,000', '$4,800', '$2,880', '$1,728', '$1,037'],
+        ['Window Treatments', '$9,000', '5 years', 'MACRS', '$1,800', '$2,880', '$1,728', '$1,037', '$622'],
+        ['Total Personal Property', '$52,000', '', '', '$10,400', '$16,640', '$9,984', '$5,991', '$3,595'],
+        ['', '', '', '', '', '', '', '', ''],
+        ['Total Depreciation', '$4,732,000', '', '', '$196,340', '$202,580', '$195,924', '$191,931', '$189,535']
+      ],
+      'deductions': [
+        ['Deductions Analysis', '2023', 'Allowable', 'Disallowed', 'Notes'],
+        ['Operating Expenses', '', '', '', ''],
+        ['Property Management', '$76,810', '$76,810', '$0', 'Fully deductible'],
+        ['Repairs & Maintenance', '$153,621', '$153,621', '$0', 'Ordinary & necessary'],
+        ['Utilities', '$92,172', '$92,172', '$0', 'Fully deductible'],
+        ['Insurance', '$46,086', '$46,086', '$0', 'Fully deductible'],
+        ['Marketing', '$15,362', '$15,362', '$0', 'Fully deductible'],
+        ['Administrative', '$30,724', '$30,724', '$0', 'Fully deductible'],
+        ['Total Operating Expenses', '$414,775', '$414,775', '$0', ''],
+        ['', '', '', '', ''],
+        ['Taxes', '', '', '', ''],
+        ['Property Tax', '$184,345', '$184,345', '$0', 'Fully deductible'],
+        ['', '', '', '', ''],
+        ['Interest', '', '', '', ''],
+        ['Mortgage Interest', '$175,500', '$175,500', '$0', 'Business interest'],
+        ['', '', '', '', ''],
+        ['Depreciation & Amortization', '', '', '', ''],
+        ['Building Depreciation', '$151,273', '$151,273', '$0', '27.5-year SL'],
+        ['Land Improvements', '$34,667', '$34,667', '$0', '15-year SL'],
+        ['Personal Property', '$10,400', '$10,400', '$0', '5-year MACRS'],
+        ['Loan Costs Amortization', '$3,000', '$3,000', '$0', 'Amortized over loan term'],
+        ['Total Depreciation & Amortization', '$199,340', '$199,340', '$0', ''],
+        ['', '', '', '', ''],
+        ['Capital Expenditures', '', '', '', ''],
+        ['Renovation Costs', '$100,000', '$0', '$100,000', 'Must be capitalized'],
+        ['Equipment Purchases', '$25,000', '$0', '$25,000', 'Must be capitalized'],
+        ['Total Capital Expenditures', '$125,000', '$0', '$125,000', ''],
+        ['', '', '', '', ''],
+        ['Total Deductions', '$1,098,960', '$973,960', '$125,000', '']
+      ],
+      'planning': [
+        ['Tax Planning Strategies', 'Strategy', 'Potential Benefit', 'Implementation', 'Notes'],
+        ['Cost Segregation', 'Accelerate depreciation by identifying components with shorter recovery periods', '$75,000 - $125,000 NPV', 'Engage cost segregation specialist', 'Most effective for new purchases'],
+        ['', '', '', '', ''],
+        ['1031 Exchange', 'Defer capital gains tax by exchanging for like-kind property', '$300,000 - $500,000 tax deferral', 'Identify replacement property within 45 days', 'Consider for exit strategy'],
+        ['', '', '', '', ''],
+        ['Bonus Depreciation', 'Take 100% depreciation on eligible property in year placed in service', '$50,000 - $75,000 first-year benefit', 'Apply to qualifying property', 'Phase-down begins after 2022'],
+        ['', '', '', '', ''],
+        ['Expense vs. Capitalize', 'Properly classify repairs as expenses rather than improvements', '$15,000 - $25,000 annually', 'Document repair nature of work', 'Must meet IRS requirements'],
+        ['', '', '', '', ''],
+        ['Operating Structure', 'Optimize entity structure for tax efficiency', 'Varies based on circumstances', 'Consider LLC vs. Partnership', 'Review annually'],
+        ['', '', '', '', ''],
+        ['Qualified Business Income Deduction', 'Take advantage of 20% pass-through deduction', '$25,000 - $40,000 annually', 'Structure to maximize QBI', 'Subject to income limitations'],
+        ['', '', '', '', ''],
+        ['Opportunity Zone Investment', 'Defer and potentially reduce capital gains', 'Up to 15% reduction in deferred gain', 'Reinvest gains within 180 days', 'Long-term investment required'],
+        ['', '', '', '', ''],
+        ['Annual Gift Tax Exclusion', 'Transfer property interests to family members', '$16,000 per recipient annually', 'Structured gifting program', 'Estate planning benefit'],
+        ['', '', '', '', ''],
+        ['Timing of Income/Expenses', 'Accelerate expenses, defer income at year-end', '$10,000 - $20,000 timing benefit', 'December planning', 'Cash method taxpayers']
+      ],
+      'compliance': [
+        ['Tax Compliance Calendar', 'Deadline', 'Filing Requirement', 'Notes', 'Status'],
+        ['January 31', 'Issue Form 1099-MISC to vendors', 'Required for payments of $600+', 'Complete'],
+        ['', '', '', '', ''],
+        ['February 28', 'File Form 1099-MISC with IRS (paper)', 'Summary of all 1099s issued', 'Complete'],
+        ['', '', '', '', ''],
+        ['March 15', 'Partnership Tax Return (Form 1065)', 'Can request 6-month extension', 'Complete'],
+        ['', '', '', '', ''],
+        ['March 31', 'File Form 1099-MISC with IRS (electronic)', 'Required if filing 250+ forms', 'Complete'],
+        ['', '', '', '', ''],
+        ['April 15', 'Estimated Tax Payment (Q1)', 'For partners/members', 'Complete'],
+        ['', '', '', '', ''],
+        ['June 15', 'Estimated Tax Payment (Q2)', 'For partners/members', 'Complete'],
+        ['', '', '', '', ''],
+        ['September 15', 'Extended Partnership Return Due', 'Final deadline with extension', 'N/A'],
+        ['September 15', 'Estimated Tax Payment (Q3)', 'For partners/members', 'Upcoming'],
+        ['', '', '', '', ''],
+        ['October 15', 'Extended Individual Returns Due', 'For partners/members', 'Upcoming'],
+        ['', '', '', '', ''],
+        ['December 31', 'Year-end tax planning', 'Income/expense timing decisions', 'Upcoming'],
+        ['January 15', 'Estimated Tax Payment (Q4)', 'For partners/members', 'Upcoming'],
+        ['', '', '', '', ''],
+        ['', '', '', '', ''],
+        ['Document Retention', 'Policy', '', '', ''],
+        ['Tax Returns', 'Permanent', '', '', ''],
+        ['Supporting Documents', '7 years', '', '', ''],
+        ['Property Records', 'Until disposal + 7 years', '', '', '']
+      ]
+    };
+
+    const result = initialData[sheetId] || [['No data available for ' + sheetId]];
+    console.log("Returning data for sheet:", result);
+    return result;
   };
 
   // Handle saving Excel sheets
   const handleSaveExcelSheet = (data: any[][], sheetName: string, sheetId: string) => {
-    console.log(`Saving ${sheetName} Excel data:`, data);
-    // In a real application, this would save to your backend
-    alert(`${sheetName} data has been saved!`);
+    console.log(`Saving ${sheetName} data:`, data);
   };
 
-  // Function to get initial data for financial analysis tabs
-  const getFinancialAnalysisData = (tabId: string) => {
-    switch (tabId) {
-      case 'summary':
-        return [
-          ['West Broadway 502 - Summary', '', '', '', ''],
-          ['As of January 2024', '', '', '', ''],
-          ['', '', '', '', ''],
-          ['Metric', 'Current', 'Prior Year', 'Change', 'Notes'],
-          ['Property Value', '$33,500,000', '$30,000,000', '+11.7%', 'Based on recent appraisal'],
-          ['NOI', '$2,070,000', '$1,920,000', '+7.8%', 'Increased due to new leases'],
-          ['Cap Rate', '6.18%', '6.40%', '-0.22%', 'Market compression'],
-          ['Occupancy', '92%', '88%', '+4%', 'New tenants in Q4 2023'],
-          ['Avg Lease Term', '7.2 years', '6.5 years', '+0.7 years', 'New long-term tenant'],
-          ['WALT', '4.3 years', '3.8 years', '+0.5 years', 'Weighted average lease term'],
-          ['Debt Balance', '$21,000,000', '$21,000,000', '0%', 'No principal paydown yet'],
-          ['LTV', '62.7%', '70.0%', '-7.3%', 'Improved due to value increase'],
-          ['DSCR', '2.01', '1.86', '+0.15', 'Improved debt service coverage'],
-          ['', '', '', '', ''],
-          ['Performance Summary', '', '', '', ''],
-          ['Property is outperforming projections with strong leasing momentum and positive mark-to-market on new leases.', '', '', '', '']
-        ];
-      case 'assumptions':
-        return [
-          ['West Broadway 502 - Assumptions', '', '', '', ''],
-          ['', '', '', '', ''],
-          ['General Assumptions', '', '', '', ''],
-          ['Acquisition Date', 'May 2022', '', '', ''],
-          ['Hold Period', '5 years', '', '', ''],
-          ['Exit Date', 'May 2027', '', '', ''],
-          ['', '', '', '', ''],
-          ['Growth Rates', 'Year 1', 'Year 2', 'Year 3', 'Year 4+'],
-          ['Revenue Growth', '3.0%', '3.0%', '2.5%', '2.5%'],
-          ['Expense Growth', '2.5%', '2.5%', '2.0%', '2.0%'],
-          ['', '', '', '', ''],
-          ['Leasing Assumptions', '', '', '', ''],
-          ['Renewal Probability', '70%', '', '', ''],
-          ['Downtime', '6 months', '', '', ''],
-          ['TI - New Leases', '$65/SF', '', '', ''],
-          ['TI - Renewals', '$15/SF', '', '', ''],
-          ['Leasing Commissions - New', '6%', '', '', ''],
-          ['Leasing Commissions - Renewal', '3%', '', '', ''],
-          ['', '', '', '', ''],
-          ['Exit Assumptions', '', '', '', ''],
-          ['Exit Cap Rate', '6.50%', '', '', ''],
-          ['Selling Costs', '2.50%', '', '', '']
-        ];
-      case 'yieldMatrix':
-        return [
-          ['West Broadway 502 - Yield Matrix', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['Exit Cap Rate', 'Exit Year 4', 'Exit Year 5', 'Exit Year 6', 'Exit Year 7', 'Exit Year 8', 'Exit Year 9', 'Exit Year 10'],
-          ['5.50%', '18.4%', '17.2%', '16.3%', '15.4%', '14.7%', '14.1%', '13.5%'],
-          ['5.75%', '17.1%', '16.2%', '15.5%', '14.8%', '14.1%', '13.5%', '13.0%'],
-          ['6.00%', '15.9%', '15.3%', '14.7%', '14.1%', '13.5%', '13.0%', '12.6%'],
-          ['6.25%', '14.8%', '14.4%', '13.9%', '13.4%', '12.9%', '12.5%', '12.1%'],
-          ['6.50%', '13.7%', '13.5%', '13.1%', '12.7%', '12.3%', '12.0%', '11.7%'],
-          ['6.75%', '12.7%', '12.6%', '12.3%', '12.0%', '11.7%', '11.5%', '11.2%'],
-          ['7.00%', '11.8%', '11.8%', '11.6%', '11.4%', '11.2%', '11.0%', '10.8%'],
-          ['', '', '', '', '', '', '', ''],
-          ['Note: Values represent IRR projections', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['Current Assumption', '', '', '', '', '', '', ''],
-          ['Exit Cap: 6.50%', '', '', '', '', '', '', ''],
-          ['Hold Period: 5 years', '', '', '', '', '', '', ''],
-          ['Projected IRR: 13.5%', '', '', '', '', '', '', '']
-        ];
-      case 'pandl':
-        return [
-          ['West Broadway 502 - Profit & Loss', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', ''],
-          ['', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Total'],
-          ['INCOME', '', '', '', '', '', ''],
-          ['Base Rental Income', '$1,828,200', '$1,883,046', '$1,939,537', '$1,987,526', '$2,037,214', '$9,675,523'],
-          ['Expense Reimbursements', '$225,000', '$231,750', '$238,703', '$243,477', '$248,346', '$1,187,276'],
-          ['Parking Income', '$33,600', '$34,608', '$35,646', '$36,359', '$37,086', '$177,299'],
-          ['Other Income', '$3,000', '$3,090', '$3,183', '$3,246', '$3,311', '$15,830'],
-          ['  Gross Potential Income', '$2,089,800', '$2,152,494', '$2,217,069', '$2,270,608', '$2,325,957', '$11,055,928'],
-          ['Less: Vacancy', '($127,680)', '($131,510)', '($135,456)', '($132,423)', '($135,734)', '($662,803)'],
-          ['  Effective Gross Income', '$1,962,120', '$2,020,984', '$2,081,613', '$2,138,185', '$2,190,223', '$10,393,125'],
-          ['', '', '', '', '', '', ''],
-          ['EXPENSES', '', '', '', '', '', ''],
-          ['Property Tax', '$202,500', '$208,575', '$214,832', '$219,129', '$223,511', '$1,068,547'],
-          ['Insurance', '$67,500', '$69,525', '$71,611', '$73,043', '$74,504', '$356,183'],
-          ['Utilities', '$135,000', '$139,050', '$143,222', '$146,086', '$149,008', '$712,366'],
-          ['Repairs & Maintenance', '$90,000', '$92,700', '$95,481', '$97,391', '$99,338', '$474,910'],
-          ['Janitorial', '$81,000', '$83,430', '$85,933', '$87,651', '$89,404', '$427,418'],
-          ['Management Fee', '$70,867', '$73,000', '$75,190', '$77,070', '$78,997', '$375,124'],
-          ['General & Administrative', '$45,000', '$46,350', '$47,741', '$48,695', '$49,669', '$237,455'],
-          ['Other Expenses', '$58,500', '$60,255', '$62,063', '$63,304', '$64,570', '$308,692'],
-          ['  Total Operating Expenses', '$750,367', '$772,885', '$796,073', '$812,369', '$828,991', '$3,960,695'],
-          ['', '', '', '', '', '', ''],
-          ['NET OPERATING INCOME', '$1,211,753', '$1,248,099', '$1,285,540', '$1,325,816', '$1,361,232', '$6,432,430']
-        ];
-      case 'lev':
-        return [
-          ['West Broadway 502 - Leasing & Expiration Values', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', ''],
-          ['Suite', 'Tenant', 'SF', 'Lease Start', 'Lease End', 'Current Rent/SF', 'Market Rent/SF'],
-          ['100', 'First National Bank', '5,500', '01/01/2021', '12/31/2030', '$3.25', '$3.60'],
-          ['200', 'Smith & Partners Law', '8,250', '06/01/2022', '05/31/2027', '$3.40', '$3.50'],
-          ['300', 'Johnson Consulting', '8,250', '03/01/2020', '02/28/2025', '$3.35', '$3.55'],
-          ['400', 'Tech Innovators Inc.', '8,250', '09/01/2023', '08/31/2028', '$3.50', '$3.50'],
-          ['500', 'Allied Insurance Group', '8,250', '04/01/2022', '03/31/2032', '$3.45', '$3.40'],
-          ['600', 'Vacant', '6,500', 'N/A', 'N/A', 'N/A', '$3.30'],
-          ['', '', '', '', '', '', ''],
-          ['ROLLOVER SUMMARY', '', '', '', '', '', ''],
-          ['Year', 'SF Expiring', '% of Building', 'Expiring Rent', 'Market Rent', 'Mark-to-Market', 'Est. TI/LC Costs'],
-          ['2024', '0', '0.0%', '$0', '$0', '0.0%', '$0'],
-          ['2025', '8,250', '18.3%', '$3.35', '$3.55', '6.0%', '$412,500'],
-          ['2026', '0', '0.0%', '$0', '$0', '0.0%', '$0'],
-          ['2027', '8,250', '18.3%', '$3.40', '$3.50', '2.9%', '$412,500'],
-          ['2028', '8,250', '18.3%', '$3.50', '$3.50', '0.0%', '$412,500'],
-          ['2029', '0', '0.0%', '$0', '$0', '0.0%', '$0'],
-          ['2030+', '13,750', '30.6%', '$3.35', '$3.50', '4.5%', '$687,500']
-        ];
-      case 'roofReserve':
-        return [
-          ['West Broadway 502 - Roof Reserve Analysis', '', '', '', '', ''],
-          ['', '', '', '', '', ''],
-          ['Roof Section', 'Area (SF)', 'Age (Years)', 'Expected Life', 'Remaining Life', 'Replacement Cost'],
-          ['Main Building (East)', '12,500', '18', '25', '7', '$187,500'],
-          ['Main Building (West)', '12,500', '18', '25', '7', '$187,500'],
-          ['North Wing', '8,000', '10', '25', '15', '$120,000'],
-          ['South Wing', '8,000', '10', '25', '15', '$120,000'],
-          ['Entry Canopy', '500', '5', '20', '15', '$15,000'],
-          ['', '', '', '', '', ''],
-          ['RESERVE FUNDING SCHEDULE', '', '', '', '', ''],
-          ['Year', 'Annual Funding', 'Expenditures', 'Running Balance', '', ''],
-          ['Current', '$0', '$0', '$150,000', '', ''],
-          ['2024', '$50,000', '$0', '$200,000', '', ''],
-          ['2025', '$50,000', '$0', '$250,000', '', ''],
-          ['2026', '$50,000', '$0', '$300,000', '', ''],
-          ['2027', '$50,000', '$0', '$350,000', '', ''],
-          ['2028', '$50,000', '$0', '$400,000', '', ''],
-          ['2029', '$50,000', '$0', '$450,000', '', ''],
-          ['2030', '$50,000', '$375,000', '$125,000', '', ''],
-          ['2031', '$50,000', '$0', '$175,000', '', ''],
-          ['', '', '', '', '', ''],
-          ['NOTES', '', '', '', '', ''],
-          ['Roof inspection conducted Q4 2023. Main building sections showing signs of wear but no immediate issues.', '', '', '', '', ''],
-          ['Recommended increased reserve funding to prepare for replacement at end of expected life.', '', '', '', '', '']
-        ];
-      // Add more cases for other tabs
-      case 'immPhysNeeds':
-        return [
-          ['West Broadway 502 - Immediate Physical Needs', '', '', '', ''],
-          ['', '', '', '', ''],
-          ['Item', 'Priority', 'Cost Estimate', 'Timeline', 'Status'],
-          ['HVAC System Replacement (Phase 1)', 'Critical', '$375,000', 'Q1-Q2 2024', 'In Progress'],
-          ['Parking Garage Repairs', 'High', '$180,000', 'Q1 2024', 'Completed'],
-          ['Elevator Modernization', 'Medium', '$380,000', 'Q3-Q4 2024', 'Planning'],
-          ['Fire Alarm System Upgrade', 'High', '$125,000', 'Q2 2024', 'Scheduled'],
-          ['ADA Compliance Improvements', 'Medium', '$95,000', 'Q2-Q3 2024', 'Not Started'],
-          ['Main Lobby Renovation', 'Low', '$450,000', 'Q3-Q4 2024', 'Design Phase'],
-          ['Exterior Waterproofing', 'Medium', '$110,000', 'Q3 2024', 'Not Started'],
-          ['', '', '', '', ''],
-          ['SUMMARY', '', '', '', ''],
-          ['Total Critical Needs', '$375,000', '', '', ''],
-          ['Total High Priority', '$305,000', '', '', ''],
-          ['Total Medium Priority', '$585,000', '', '', ''],
-          ['Total Low Priority', '$450,000', '', '', ''],
-          ['Total Physical Needs', '$1,715,000', '', '', ''],
-          ['', '', '', '', ''],
-          ['FUNDING STATUS', '', '', '', ''],
-          ['Available CapEx Budget', '$2,000,000', '', '', ''],
-          ['Committed Funds', '$555,000', '', '', ''],
-          ['Remaining Available', '$1,445,000', '', '', '']
-        ];
-      case 'comps':
-        return [
-          ['West Broadway 502 - Comparable Properties', '', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', '', ''],
-          ['Property', 'Address', 'Class', 'Year Built', 'Size (SF)', 'Occupancy', 'Rent/SF', 'Sale Price', 'Sale Date'],
-          ['One America Plaza', '600 W Broadway', 'A+', '1991', '623,000', '93%', '$3.75', '$330M ($530/SF)', 'Jun 2022'],
-          ['Symphony Towers', '750 B Street', 'A', '1989', '435,000', '90%', '$3.60', '$250M ($575/SF)', 'Oct 2021'],
-          ['DiamondView Tower', '350 10th Ave', 'A', '2007', '305,000', '95%', '$3.65', 'N/A', 'N/A'],
-          ['Wells Fargo Plaza', '401 B Street', 'A', '1984', '560,000', '88%', '$3.50', '$280M ($500/SF)', 'Feb 2023'],
-          ['Columbia Center', '401 W A Street', 'A', '1990', '361,000', '92%', '$3.45', '$175M ($485/SF)', 'Nov 2022'],
-          ['550 Corporate Center', '550 W C Street', 'B+', '1987', '174,000', '85%', '$3.25', '$82M ($471/SF)', 'May 2023'],
-          ['707 Broadway', '707 Broadway', 'B+', '1986', '172,000', '82%', '$3.30', 'N/A', 'N/A'],
-          ['COMP AVERAGES', '', 'A-', '1990', '375,714', '89%', '$3.50', '$516/SF', ''],
-          ['Subject Property', '502 W Broadway', 'A', '1985', '45,000', '92%', '$3.38', '$30M ($667/SF)', 'May 2022'],
-          ['', '', '', '', '', '', '', '', ''],
-          ['MARKET TRENDS', '', '', '', '', '', '', '', ''],
-          ['Leasing activity has increased 12% year-over-year in the downtown submarket.', '', '', '', '', '', '', '', ''],
-          ['Class A office cap rates have compressed by approximately 25 basis points over the past 12 months.', '', '', '', '', '', '', '', ''],
-          ['Average tenant improvement allowances have increased to $65/SF for new leases.', '', '', '', '', '', '', '', '']
-        ];
-      case 'commercialArgus':
-        return [
-          ['West Broadway 502 - ARGUS Projection Summary', '', '', '', ''],
-          ['', '', '', '', ''],
-          ['10-YEAR CASH FLOW PROJECTION', '', '', '', ''],
-          ['', 'Year 1-5 Average', 'Year 6-10 Average', 'Total 10-Year', ''],
-          ['Potential Gross Revenue', '$2,211,186', '$2,450,650', '$23,309,178', ''],
-          ['Effective Gross Revenue', '$2,078,625', '$2,303,611', '$21,911,178', ''],
-          ['Operating Expenses', '$792,122', '$877,703', '$8,349,129', ''],
-          ['Net Operating Income', '$1,286,503', '$1,425,908', '$13,562,049', ''],
-          ['Capital Expenditures', '$268,750', '$225,000', '$2,468,750', ''],
-          ['Leasing & Capital Costs', '$150,000', '$175,000', '$1,625,000', ''],
-          ['Cash Flow Before Debt Service', '$867,753', '$1,025,908', '$9,468,299', ''],
-          ['Debt Service', '$1,152,000', '$1,152,000', '$11,520,000', ''],
-          ['Cash Flow After Debt Service', '$715,753', '$873,908', '$7,948,299', ''],
-          ['', '', '', '', ''],
-          ['VALUATION SUMMARY', '', '', '', ''],
-          ['Capitalization Rate', '6.18%', '', '', ''],
-          ['Terminal Capitalization Rate', '6.50%', '', '', ''],
-          ['Discount Rate', '8.00%', '', '', ''],
-          ['Net Present Value', '$36,750,000', '', '', ''],
-          ['Value per Square Foot', '$817', '', '', ''],
-          ['Implied Going-in Cap Rate', '6.18%', '', '', ''],
-          ['Internal Rate of Return (IRR)', '13.5%', '', '', ''],
-          ['Equity Multiple', '1.82x', '', '', '']
-        ];
-      // More cases for other tabs
-      case 'operatingStatement':
-        return [
-          ['West Broadway 502 - Operating Statement', '', '', '', ''],
-          ['For the Year Ending December 31, 2023', '', '', '', ''],
-          ['', '', '', '', ''],
-          ['INCOME', 'Actual', 'Budget', 'Variance $', 'Variance %'],
-          ['Base Rental Income', '$1,828,200', '$1,800,000', '$28,200', '1.6%'],
-          ['Expense Reimbursements', '$225,000', '$215,000', '$10,000', '4.7%'],
-          ['Parking Income', '$33,600', '$30,000', '$3,600', '12.0%'],
-          ['Other Income', '$3,000', '$5,000', '($2,000)', '-40.0%'],
-          ['  Gross Potential Income', '$2,089,800', '$2,050,000', '$39,800', '1.9%'],
-          ['Less: Vacancy', '($127,680)', '($150,000)', '$22,320', '-14.9%'],
-          ['  Effective Gross Income', '$1,962,120', '$1,900,000', '$62,120', '3.3%'],
-          ['', '', '', '', ''],
-          ['EXPENSES', '', '', '', ''],
-          ['Property Tax', '$202,500', '$200,000', '$2,500', '1.3%'],
-          ['Insurance', '$67,500', '$65,000', '$2,500', '3.8%'],
-          ['Utilities', '$135,000', '$130,000', '$5,000', '3.8%'],
-          ['Repairs & Maintenance', '$90,000', '$85,000', '$5,000', '5.9%'],
-          ['Janitorial', '$81,000', '$80,000', '$1,000', '1.3%'],
-          ['Management Fee', '$70,867', '$72,000', '($1,133)', '-1.6%'],
-          ['General & Administrative', '$45,000', '$40,000', '$5,000', '12.5%'],
-          ['Other Expenses', '$58,500', '$60,000', '($1,500)', '-2.5%'],
-          ['  Total Operating Expenses', '$750,367', '$732,000', '$18,367', '2.5%'],
-          ['', '', '', '', ''],
-          ['NET OPERATING INCOME', '$1,211,753', '$1,168,000', '$43,753', '3.7%']
-        ];
-      // Add default and more cases as needed
-      default:
-        return [
-          ['No data available for this sheet yet', '', '', '', ''],
-          ['Please check back later for updates', '', '', '', '']
-        ];
+  // Get current sub-categories based on active main category
+  const currentSubCategories = SUB_CATEGORIES[activeMainCategory as keyof typeof SUB_CATEGORIES] || [];
+
+  // Reset sub-category when main category changes
+  const handleMainCategoryChange = (value: string) => {
+    setActiveMainCategory(value);
+    const defaultSubCategory = SUB_CATEGORIES[value as keyof typeof SUB_CATEGORIES]?.[0]?.id || '';
+    setActiveSubCategory(defaultSubCategory);
+  };
+
+  // Function to handle edit button click
+  const handleEditClick = () => {
+    const currentRef = getCurrentRef();
+    if (currentRef.current) {
+      currentRef.current.toggleEditMode();
     }
   };
 
-  // Define the Excel sheets
-  const excelSheets = [
-    { id: 'property', name: 'Property Info' },
-    { id: 'unitMix', name: 'Unit Mix' },
-    { id: 'income', name: 'Income' },
-    { id: 'expense', name: 'Expenses' },
-    { id: 'closingCost', name: 'Closing Costs' },
-    { id: 'capex', name: 'CapEx' },
-    { id: 'finance', name: 'Finance' },
-    { id: 'sale', name: 'Sale' },
-    { id: 'rentComps', name: 'Rent Comps' },
-  ];
+  // Function to handle export button click
+  const handleExportClick = () => {
+    const currentRef = getCurrentRef();
+    if (currentRef.current) {
+      currentRef.current.exportToExcel();
+    }
+  };
 
   return (
-    <div className="financial-hub grid gap-6">
-      {/* Financial Metrics Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between py-4">
-          <CardTitle className="text-xl font-bold">Financial Hub</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Upload className="mr-2 h-4 w-4" />
-              Import
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button variant="outline" size="sm">
-              <FilePlus2 className="mr-2 h-4 w-4" />
-              New
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 grid grid-cols-4 gap-4">
-            <div className="col-span-4 flex items-center justify-between rounded-lg border p-3 shadow-sm md:col-span-2">
-              <div className="space-y-0.5">
-                <h3 className="text-base font-medium tracking-tight">Property Value</h3>
-                <div className="text-2xl font-bold tracking-tight">
-                  <span className="text-muted-foreground text-base font-normal">Purchase: </span>
-                  {financialData.purchasePrice}
-                </div>
-                <div className="text-base font-normal tracking-tight">
-                  <span className="text-muted-foreground">Exit: </span>
-                  {financialData.exitValue}
-                </div>
-              </div>
-              <div className="rounded-full border bg-background p-1.5">
-                <div
-                  className="w-[120px] h-[120px] rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-xs"
-                >
-                  Property Value Chart
-                </div>
-              </div>
-            </div>
-            <div className="col-span-2 grid grid-cols-2 gap-4 md:col-span-1">
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">Cash on Cash</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.cashOnCash}</div>
-              </div>
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">IRR</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.irr}</div>
-              </div>
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">Total Return</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.totalInvestorReturn}</div>
-              </div>
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">Hold Period</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.holdingPeriod} yrs</div>
-              </div>
-            </div>
-            <div className="col-span-2 grid grid-cols-2 gap-4 md:col-span-1">
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">Entry Cap</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.entryCap}</div>
-              </div>
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">Exit Cap</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.exitCap}</div>
-              </div>
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">Interest Rate</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.loanInterestRate}</div>
-              </div>
-              <div className="space-y-0.5 rounded-lg border p-3 shadow-sm">
-                <h3 className="text-sm font-medium tracking-tight">DSCR</h3>
-                <div className="text-2xl font-bold tracking-tight">{financialData.dscr}</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6 p-6">
+      {/* Header with Search */}
+        <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Financial Hub</h1>
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search financial data..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        </div>
 
-      {/* Excel Sheets Section */}
-      <Card>
-        <CardHeader className="py-4">
-          <CardTitle className="text-xl font-bold">Excel Sheets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue={excelSheets[0].id} className="w-full">
-            <TabsList className="mb-4 flex h-auto w-full flex-wrap justify-start rounded-md bg-muted p-1">
-              {excelSheets.map((sheet) => (
-                <TabsTrigger 
-                  key={sheet.id}
-                  value={sheet.id}
-                  className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium"
-                >
-                  {sheet.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            
-            {excelSheets.map((sheet) => (
-              <TabsContent key={sheet.id} value={sheet.id} className="mt-0 border-0 p-0">
+      {/* Main Category Tabs */}
+      <Tabs value={activeMainCategory} onValueChange={handleMainCategoryChange} className="w-full">
+        <TabsList className="w-full grid grid-cols-4 gap-2 bg-white p-1 h-auto">
+          {MAIN_CATEGORIES.map((category) => (
+            <TabsTrigger
+              key={category.id}
+              value={category.id}
+              className="flex items-center gap-3 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                activeMainCategory === category.id ? 'bg-blue-600' : 'bg-gray-400'
+              }`}>
+                <span className="text-white font-bold">{category.icon}</span>
+              </div>
+              <span className="font-medium">{category.name}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {/* Summary Metrics - Show for all categories */}
+        <div className="grid grid-cols-4 gap-4 mt-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-sm text-gray-500">Purchase Price</div>
+              <div className="text-2xl font-bold mt-1">{summaryMetrics.purchasePrice}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-sm text-gray-500">NOI</div>
+              <div className="text-2xl font-bold mt-1">{summaryMetrics.noi}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-sm text-gray-500">Cap Rate</div>
+              <div className="text-2xl font-bold mt-1">{summaryMetrics.capRate}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-sm text-gray-500">Cash on Cash</div>
+              <div className="text-2xl font-bold mt-1">{summaryMetrics.cashOnCash}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sub-category Filter Pills */}
+        <div className="flex gap-2 mt-6">
+          {currentSubCategories.map((category) => (
+            <Button
+              key={category.id}
+              variant={activeSubCategory === category.id ? "default" : "outline"}
+              onClick={() => setActiveSubCategory(category.id)}
+              className={`rounded-full ${
+                activeSubCategory === category.id 
+                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  : 'bg-gray-50'
+              }`}
+            >
+              {category.name}
+            </Button>
+          ))}
+          <Button variant="outline" className="rounded-full bg-gray-50">
+            More
+            <ChevronDown className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Content for each main category */}
+        <TabsContent value="property">
+          {/* Existing Property Analysis Content */}
+          {activeSubCategory === 'overview' && (
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+                <CardTitle>Property Overview</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button size="sm">
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 gap-x-16 gap-y-6">
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Property Details</h3>
+                    <div className="grid grid-cols-2 gap-y-4">
+                      <div className="text-gray-500">Property Name:</div>
+                      <div>{propertyDetails.name}</div>
+                      <div className="text-gray-500">Address:</div>
+                      <div>{propertyDetails.address}</div>
+                      <div className="text-gray-500">City, State, ZIP:</div>
+                      <div>{propertyDetails.cityStateZip}</div>
+                      <div className="text-gray-500">Purchase Date:</div>
+                      <div>{propertyDetails.purchaseDate}</div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Additional Information</h3>
+                    <div className="grid grid-cols-2 gap-y-4">
+                      <div className="text-gray-500">Property Type:</div>
+                      <div>{propertyDetails.propertyType}</div>
+                      <div className="text-gray-500">Year Built:</div>
+                      <div>{propertyDetails.yearBuilt}</div>
+                      <div className="text-gray-500">Units:</div>
+                      <div>{propertyDetails.units}</div>
+                      <div className="text-gray-500">Fund:</div>
+                      <div>{propertyDetails.fund}</div>
+                  </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {activeSubCategory === 'income' && (
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+                <CardTitle>Income Analysis</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleEditClick}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button size="sm" onClick={handleExportClick}>
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
+                  <HandsontableExcel
+                    key={`income-${Date.now()}`}
+                    ref={incomeExcelRef}
+                    data={getInitialDataForSheet('income')}
+                    sheetName="Income Analysis"
+                    onSave={(data) => handleSaveExcelSheet(data, 'Income Analysis', 'income')}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+          )}
+          {activeSubCategory === 'expenses' && (
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+                <CardTitle>Expenses Analysis</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleEditClick}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button size="sm" onClick={handleExportClick}>
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                            </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
+                  <HandsontableExcel
+                    key={`expenses-${Date.now()}`}
+                    ref={expensesExcelRef}
+                    data={getInitialDataForSheet('expenses')}
+                    sheetName="Expenses Analysis"
+                    onSave={(data) => handleSaveExcelSheet(data, 'Expenses Analysis', 'expenses')}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+          )}
+          {activeSubCategory === 'financing' && (
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+                <CardTitle>Financing Analysis</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleEditClick}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button size="sm" onClick={handleExportClick}>
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
+                  <HandsontableExcel
+                    key={`financing-${Date.now()}`}
+                    ref={financingExcelRef}
+                    data={getInitialDataForSheet('financing')}
+                    sheetName="Financing Analysis"
+                    onSave={(data) => handleSaveExcelSheet(data, 'Financing Analysis', 'financing')}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+          )}
+          {activeSubCategory === 'market' && (
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+                <CardTitle>Market Analysis</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleEditClick}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button size="sm" onClick={handleExportClick}>
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
+                  <HandsontableExcel
+                    key={`market-${Date.now()}`}
+                    ref={marketExcelRef}
+                    data={getInitialDataForSheet('market')}
+                    sheetName="Market Analysis"
+                    onSave={(data) => handleSaveExcelSheet(data, 'Market Analysis', 'market')}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="financial">
+          <Card className="mt-6">
+            <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+              <CardTitle>{currentSubCategories.find(c => c.id === activeSubCategory)?.name || 'Financial Statements'}</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleEditClick}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" onClick={handleExportClick}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Export
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
                 <HandsontableExcel
-                  sheetName={sheet.name}
-                  initialData={getInitialDataForSheet(sheet.id)}
-                  onSave={(data) => handleSaveExcelSheet(data, sheet.name, sheet.id)}
+                  key={`${activeSubCategory}-${Date.now()}`}
+                  ref={financialExcelRef}
+                  data={getInitialDataForSheet(activeSubCategory)}
+                  sheetName={currentSubCategories.find(c => c.id === activeSubCategory)?.name || ''}
+                  onSave={(data) => handleSaveExcelSheet(data, activeSubCategory, activeSubCategory)}
                 />
-              </TabsContent>
-            ))}
-          </Tabs>
-        </CardContent>
-      </Card>
+              </Suspense>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Financial Analysis Section */}
-      <Card>
-        <CardHeader className="py-4">
-          <CardTitle className="text-xl font-bold">Financial Analysis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="summary" className="w-full">
-            <TabsList className="mb-4 flex h-auto w-full flex-wrap justify-start rounded-md bg-muted p-1">
-              <TabsTrigger value="summary" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Summary
-              </TabsTrigger>
-              <TabsTrigger value="assumptions" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Assumptions
-              </TabsTrigger>
-              <TabsTrigger value="yieldMatrix" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Yield Matrix
-              </TabsTrigger>
-              <TabsTrigger value="pandl" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                P&L
-              </TabsTrigger>
-              <TabsTrigger value="lev" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                LEV
-              </TabsTrigger>
-              <TabsTrigger value="roofReserve" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Roof Reserve
-              </TabsTrigger>
-              <TabsTrigger value="immPhysNeeds" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Imm Phys Needs
-              </TabsTrigger>
-              <TabsTrigger value="comps" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                COMPS
-              </TabsTrigger>
-              <TabsTrigger value="commercialArgus" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Commercial ARGUS
-              </TabsTrigger>
-              <TabsTrigger value="operatingStatement" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Operating Statement
-              </TabsTrigger>
-              <TabsTrigger value="renewalVsNew" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                Renewal vs New PreLease
-              </TabsTrigger>
-              <TabsTrigger value="pandlsSummary" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                P&Ls Summary
-              </TabsTrigger>
-              <TabsTrigger value="t12" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                T12
-              </TabsTrigger>
-              <TabsTrigger value="income2023" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                2023 Income Statement
-              </TabsTrigger>
-              <TabsTrigger value="income2022" className="data-[state=active]:bg-background rounded-sm px-3 py-2 text-sm font-medium">
-                2022 Income Statement
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Tab Content */}
-            <TabsContent value="summary" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Summary"
-                initialData={getFinancialAnalysisData('summary')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Summary', 'summary')}
-              />
-            </TabsContent>
-            <TabsContent value="assumptions" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Assumptions"
-                initialData={getFinancialAnalysisData('assumptions')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Assumptions', 'assumptions')}
-              />
-            </TabsContent>
-            <TabsContent value="yieldMatrix" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Yield Matrix"
-                initialData={getFinancialAnalysisData('yieldMatrix')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Yield Matrix', 'yieldMatrix')}
-              />
-            </TabsContent>
-            <TabsContent value="pandl" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="P&L"
-                initialData={getFinancialAnalysisData('pandl')}
-                onSave={(data) => handleSaveExcelSheet(data, 'P&L', 'pandl')}
-              />
-            </TabsContent>
-            <TabsContent value="lev" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="LEV"
-                initialData={getFinancialAnalysisData('lev')}
-                onSave={(data) => handleSaveExcelSheet(data, 'LEV', 'lev')}
-              />
-            </TabsContent>
-            <TabsContent value="roofReserve" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Roof Reserve"
-                initialData={getFinancialAnalysisData('roofReserve')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Roof Reserve', 'roofReserve')}
-              />
-            </TabsContent>
-            <TabsContent value="immPhysNeeds" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Imm Phys Needs"
-                initialData={getFinancialAnalysisData('immPhysNeeds')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Imm Phys Needs', 'immPhysNeeds')}
-              />
-            </TabsContent>
-            <TabsContent value="comps" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="COMPS"
-                initialData={getFinancialAnalysisData('comps')}
-                onSave={(data) => handleSaveExcelSheet(data, 'COMPS', 'comps')}
-              />
-            </TabsContent>
-            <TabsContent value="commercialArgus" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Commercial ARGUS"
-                initialData={getFinancialAnalysisData('commercialArgus')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Commercial ARGUS', 'commercialArgus')}
-              />
-            </TabsContent>
-            <TabsContent value="operatingStatement" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Operating Statement"
-                initialData={getFinancialAnalysisData('operatingStatement')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Operating Statement', 'operatingStatement')}
-              />
-            </TabsContent>
-            <TabsContent value="renewalVsNew" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="Renewal vs New PreLease"
-                initialData={getFinancialAnalysisData('renewalVsNew')}
-                onSave={(data) => handleSaveExcelSheet(data, 'Renewal vs New PreLease', 'renewalVsNew')}
-              />
-            </TabsContent>
-            <TabsContent value="pandlsSummary" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="P&Ls Summary"
-                initialData={getFinancialAnalysisData('pandlsSummary')}
-                onSave={(data) => handleSaveExcelSheet(data, 'P&Ls Summary', 'pandlsSummary')}
-              />
-            </TabsContent>
-            <TabsContent value="t12" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="T12"
-                initialData={getFinancialAnalysisData('t12')}
-                onSave={(data) => handleSaveExcelSheet(data, 'T12', 't12')}
-              />
-            </TabsContent>
-            <TabsContent value="income2023" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="2023 Income Statement"
-                initialData={getFinancialAnalysisData('income2023')}
-                onSave={(data) => handleSaveExcelSheet(data, '2023 Income Statement', 'income2023')}
-              />
-            </TabsContent>
-            <TabsContent value="income2022" className="mt-0 border-0 p-0">
-              <HandsontableExcel
-                sheetName="2022 Income Statement"
-                initialData={getFinancialAnalysisData('income2022')}
-                onSave={(data) => handleSaveExcelSheet(data, '2022 Income Statement', 'income2022')}
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+        <TabsContent value="acquisition">
+          <Card className="mt-6">
+            <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+              <CardTitle>{currentSubCategories.find(c => c.id === activeSubCategory)?.name || 'Acquisition Analysis'}</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleEditClick}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" onClick={handleExportClick}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Export
+                </Button>
+            </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
+                <HandsontableExcel
+                  key={`${activeSubCategory}-${Date.now()}`}
+                  ref={acquisitionExcelRef}
+                  data={getInitialDataForSheet(activeSubCategory)}
+                  sheetName={currentSubCategories.find(c => c.id === activeSubCategory)?.name || ''}
+                  onSave={(data) => handleSaveExcelSheet(data, activeSubCategory, activeSubCategory)}
+                />
+              </Suspense>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tax">
+          <Card className="mt-6">
+            <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b">
+              <CardTitle>{currentSubCategories.find(c => c.id === activeSubCategory)?.name || 'Tax Planning'}</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleEditClick}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" onClick={handleExportClick}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Export
+                </Button>
+        </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <Suspense fallback={<div className="p-4 text-center">Loading spreadsheet...</div>}>
+                <HandsontableExcel
+                  key={`${activeSubCategory}-${Date.now()}`}
+                  ref={taxExcelRef}
+                  data={getInitialDataForSheet(activeSubCategory)}
+                  sheetName={currentSubCategories.find(c => c.id === activeSubCategory)?.name || ''}
+                  onSave={(data) => handleSaveExcelSheet(data, activeSubCategory, activeSubCategory)}
+                />
+              </Suspense>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default FinancialHub; 
+} 

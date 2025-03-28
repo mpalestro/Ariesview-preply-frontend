@@ -10,7 +10,7 @@ export default function AriesViewAI() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero section */}
-      <div className="relative bg-[#F8F9FF] pt-32 pb-20">
+      <div className="relative bg-[#F8F9FF] pt-6 md:pt-8 pb-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('/background-pattern.svg')] opacity-10"></div>
         </div>
@@ -49,20 +49,6 @@ export default function AriesViewAI() {
           <p className="mt-4 text-xl max-w-3xl mx-auto">
             Experience AI designed specifically for commercial real estate analysis and decision-making
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-6">
-            <Link
-              href="/operations-dashboard/properties"
-              className="inline-flex items-center px-8 py-3 rounded-lg bg-white text-[#001233] font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Open Document Hub →
-            </Link>
-            <Link
-              href="/operations-dashboard/properties"
-              className="inline-flex items-center px-8 py-3 rounded-lg border-2 border-white text-white font-semibold hover:bg-white/10 transition-colors"
-            >
-              View Financial Hub →
-            </Link>
-          </div>
         </div>
       </div>
 

@@ -30,12 +30,12 @@ export default function RealEstateSections() {
   ];
 
   return (
-    <section className="bg-gray-100 pt-0 pb-16">
+    <section className="bg-gray-100 pt-10 pb-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         
         {/* Product Cards Section */}
-        <div className="mb-20">
-          <h2 className="text-3xl font-bold text-[#001A41] mb-8 text-center">Our Solutions</h2>
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-[#001A41] mb-6 text-center">Our Solutions</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Acquisition Screening Card */}
@@ -214,13 +214,12 @@ export default function RealEstateSections() {
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center text-center">
                 <div className="bg-blue-100 p-4 rounded-full mb-6">
                   <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
+                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Automated Analysis</h3>
+                <h3 className="text-xl font-bold mb-3">Comprehensive Property Dashboard</h3>
                 <p className="text-gray-600">
-                  Skip the manual number crunching. Our platform automatically analyzes property financials, market data, and investment metrics to deliver comprehensive insights within minutes, not days.
+                  Monitor your entire portfolio with at-a-glance metrics. Track occupancy rates, financial performance, and property status from a centralized operations dashboard.
                 </p>
               </div>
               
@@ -228,12 +227,12 @@ export default function RealEstateSections() {
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center text-center">
                 <div className="bg-blue-100 p-4 rounded-full mb-6">
                   <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path>
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Intelligent Deal Management</h3>
+                <h3 className="text-xl font-bold mb-3">Intelligent Document Management</h3>
                 <p className="text-gray-600">
-                  Manage your entire real estate portfolio from one intuitive dashboard. Track properties, leases, and financial performance with our streamlined interface designed specifically for real estate professionals.
+                  Manage all property documents with AI-powered insights. Extract key information from leases, financial statements, and contracts with automated document analysis.
                 </p>
               </div>
               
@@ -241,27 +240,27 @@ export default function RealEstateSections() {
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center text-center">
                 <div className="bg-blue-100 p-4 rounded-full mb-6">
                   <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                    <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Advanced Portfolio Insights</h3>
+                <h3 className="text-xl font-bold mb-3">AI-Powered Financial Analysis</h3>
                 <p className="text-gray-600">
-                  Get a comprehensive view of your real estate investments with detailed analytics on property performance, market trends, and ROI projections. Make data-driven decisions with confidence using our advanced reporting tools.
+                  Leverage AriesView's AI to automatically analyze property financials, track NOI, calculate ROI, and generate financial projections with our comprehensive financial hub.
                 </p>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+              
               {/* Feature 4 */}
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center text-center">
                 <div className="bg-blue-100 p-4 rounded-full mb-6">
                   <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd"></path>
+                    <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                    <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                    <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Real-Time Market Intelligence</h3>
+                <h3 className="text-xl font-bold mb-3">Interactive Data Visualization</h3>
                 <p className="text-gray-600">
-                  Stay ahead of market trends with real-time data and analytics. Our platform continuously monitors market conditions, comparable properties, and economic indicators to help you identify opportunities and optimize your portfolio.
+                  Transform complex property data into clear, actionable insights with customizable dashboards and interactive charts for performance metrics, market trends, and benchmarking.
                 </p>
               </div>
               
@@ -269,12 +268,12 @@ export default function RealEstateSections() {
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center text-center">
                 <div className="bg-blue-100 p-4 rounded-full mb-6">
                   <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+                    <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-3">AI-Powered Real Estate Analysis</h3>
+                <h3 className="text-xl font-bold mb-3">Spreadsheet & Excel Integration</h3>
                 <p className="text-gray-600">
-                  Our AI technology revolutionizes real estate investment analysis by automating due diligence, extracting key data from documents, and providing predictive insights for property performance and market trends.
+                  Create and manage financial models with our built-in spreadsheet functionality. Import/export Excel data, use formulas, and collaborate on financial templates in real-time.
                 </p>
               </div>
               
@@ -282,21 +281,25 @@ export default function RealEstateSections() {
               <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center text-center">
                 <div className="bg-blue-100 p-4 rounded-full mb-6">
                   <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path>
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Smart Document Management</h3>
+                <h3 className="text-xl font-bold mb-3">AriesView AI Assistant</h3>
                 <p className="text-gray-600">
-                  Streamline your document workflow with intelligent lease abstraction, automated contract analysis, and secure digital storage for all your real estate documentation and compliance records.
+                  Ask questions about your portfolio in plain English. Our AI assistant analyzes portfolio metrics, lease performance, operating expenses, and identifies opportunities.
                 </p>
               </div>
             </div>
           </div>
           
           {/* FAQs section */}
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">FAQs answered</h2>
-            <FaqAccordion faqs={investorFaqs} />
+          <div className="px-8">
+            <h2 className="text-4xl font-bold text-[#001A41] mb-12 text-center">
+              Frequently Asked Questions
+            </h2>
+            <div className="max-w-3xl mx-auto">
+              <FaqAccordion faqs={investorFaqs} />
+            </div>
           </div>
         </div>
         

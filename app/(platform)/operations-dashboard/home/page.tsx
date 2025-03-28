@@ -223,11 +223,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3 3 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                           </svg>
@@ -235,7 +235,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">AriesView AI</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Access intelligent insights and AI-powered assistance for property management and analysis</p>
+                    <p className="text-white/90 text-sm flex-grow">Access intelligent insights and AI-powered assistance for property management and analysis</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -269,17 +269,17 @@ function HomePage() {
                     className="block h-full"
                   >
                     <div
-                      className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                      className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                     >
                       <div className="flex items-center mb-4">
                         <div className="bg-white p-3 rounded-lg">
-                          <span className="text-[#0f172a]">
+                          <span className="text-[#000C2F]">
                           {pillar.icon}
                           </span>
                         </div>
                       </div>
                       <h3 className="text-lg font-medium mb-3">{pillar.title}</h3>
-                      <p className="text-gray-300 text-sm flex-grow">{pillar.description}</p>
+                      <p className="text-white/90 text-sm flex-grow">{pillar.description}</p>
                       <div className="mt-4 flex items-center text-sm text-white pt-2">
                         <span>Open</span>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -313,11 +313,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11 4a1 1 0 10-2 0v4a1 1 0 102 0V7zm-3 1a1 1 0 10-2 0v3a1 1 0 102 0V8zM8 9a1 1 0 00-2 0v2a1 1 0 102 0V9z" clipRule="evenodd" />
                           </svg>
@@ -325,7 +325,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Market Analysis</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Evaluate market trends, demographics, and competitive landscape for potential acquisitions</p>
+                    <p className="text-white/90 text-sm flex-grow">Evaluate market trends, demographics, and competitive landscape for potential acquisitions</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -341,11 +341,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7zm2 1a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm4-4a1 1 0 100 2h.01a1 1 0 100-2H13zM9 9a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zM7 8a1 1 0 000 2h.01a1 1 0 000-2H7z" clipRule="evenodd" />
                           </svg>
@@ -353,7 +353,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Financial Modeling</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Create and analyze financial models, cash flow projections, and ROI for potential acquisitions</p>
+                    <p className="text-white/90 text-sm flex-grow">Create and analyze financial models, cash flow projections, and ROI for potential acquisitions</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -369,11 +369,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clipRule="evenodd" />
                           </svg>
@@ -381,7 +381,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Due Diligence</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Manage comprehensive property inspection, documentation review, and risk assessment processes</p>
+                    <p className="text-white/90 text-sm flex-grow">Manage comprehensive property inspection, documentation review, and risk assessment processes</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -414,11 +414,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                           </svg>
@@ -426,7 +426,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Performance Reports</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Generate comprehensive reports on property and portfolio performance for investors</p>
+                    <p className="text-white/90 text-sm flex-grow">Generate comprehensive reports on property and portfolio performance for investors</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -442,11 +442,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
@@ -455,7 +455,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Financial Distributions</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Track and manage investor distributions, returns, and capital accounts</p>
+                    <p className="text-white/90 text-sm flex-grow">Track and manage investor distributions, returns, and capital accounts</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -471,11 +471,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
                           </svg>
@@ -483,7 +483,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Investor Portal</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Provide secure access to personalized investment data, documents, and communications</p>
+                    <p className="text-white/90 text-sm flex-grow">Provide secure access to personalized investment data, documents, and communications</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -516,11 +516,11 @@ function HomePage() {
                   className="block h-full"
                 >
                   <div
-                    className="bg-[#0f172a] rounded-lg p-6 text-white hover:bg-[#1e293b] transition-colors duration-200 cursor-pointer h-full flex flex-col"
+                    className="bg-[#000C2F] rounded-lg p-6 text-white hover:bg-[#001233] transition-colors duration-200 cursor-pointer h-full flex flex-col"
                   >
                     <div className="flex items-center mb-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <span className="text-[#0f172a]">
+                        <span className="text-[#000C2F]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                           </svg>
@@ -528,7 +528,7 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-lg font-medium mb-3">Benchmark Analysis</h3>
-                    <p className="text-gray-300 text-sm flex-grow">Compare and analyze property performance metrics against industry standards and competitors</p>
+                    <p className="text-white/90 text-sm flex-grow">Compare and analyze property performance metrics against industry standards and competitors</p>
                     <div className="mt-4 flex items-center text-sm text-white pt-2">
                       <span>Open</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -547,7 +547,7 @@ function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-wrap justify-between items-center">
               <div className="flex space-x-6">
-                <Link href="/CustomerSuccess" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/customer-success" className="text-gray-300 hover:text-white transition-colors">
                   Customer Success
                 </Link>
                 <Link href="#" className="text-gray-300 hover:text-white transition-colors">

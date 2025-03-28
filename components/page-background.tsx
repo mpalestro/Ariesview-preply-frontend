@@ -16,6 +16,7 @@ export default function PageBackground() {
           className="max-w-none"
           src={Stripes}
           width={768}
+          height={420}
           alt="Stripes"
           priority
         />
@@ -29,8 +30,8 @@ export default function PageBackground() {
         <Image
           src={AuthBg}
           alt="Auth background"
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: "cover" }}
           className="opacity-[0.03]"
           priority
         />
@@ -45,6 +46,7 @@ export default function PageBackground() {
           className="max-w-none"
           src={StripesDark}
           width={768}
+          height={420}
           alt="Stripes Dark"
           priority
         />

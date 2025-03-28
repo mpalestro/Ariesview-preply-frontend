@@ -50,18 +50,22 @@ export default function SignIn() {
   return (
     <div className="max-w-md mx-auto w-full">
       {/* Title Section */}
-      <div className="mb-10 text-center pt-12">
+      <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome back</h1>
         <p className="text-gray-600">Sign in to your AriesView account</p>
       </div>
 
       {/* Form Section */}
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+      <div className="bg-white p-8 sm:p-10 rounded-xl shadow-lg border border-gray-200">
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg">
+            <p className="text-red-600 text-sm text-center">{error}</p>
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="email">
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="email">
                 Email
               </label>
               <input
@@ -69,17 +73,17 @@ export default function SignIn() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="form-input w-full py-3 px-4 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200"
+                className="form-input w-full py-3 px-4 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200"
                 placeholder="your@email.com"
                 required
               />
             </div>
             <div>
-              <div className="flex justify-between mb-1">
+              <div className="flex justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700" htmlFor="password">
                   Password
                 </label>
-                <Link className="text-sm text-blue-600 hover:text-blue-800" href="/reset-password">
+                <Link className="text-sm text-blue-600 hover:text-blue-800 font-medium" href="/reset-password">
                   Forgot password?
                 </Link>
               </div>
@@ -88,7 +92,7 @@ export default function SignIn() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-input w-full py-3 px-4 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200"
+                className="form-input w-full py-3 px-4 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200"
                 placeholder="••••••••"
                 required
               />
@@ -97,7 +101,7 @@ export default function SignIn() {
           <div className="mt-8">
             <button 
               type="submit"
-              className="btn w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition duration-200 flex justify-center items-center"
+              className="btn w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition duration-200 flex justify-center items-center shadow-sm"
               disabled={isLoading}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
@@ -107,7 +111,7 @@ export default function SignIn() {
       </div>
 
       {/* Signup Link */}
-      <div className="mt-8 text-center pb-10">
+      <div className="mt-8 text-center">
         <p className="text-gray-600">
           Don't have an account?{" "}
           <Link className="text-blue-600 hover:text-blue-800 font-medium" href="/signup">
